@@ -1,4 +1,4 @@
-namespace MusicStream.Core.Domain.Enums;
+namespace MusicStream.Core.Enums;
 
 public enum UserRole
 {

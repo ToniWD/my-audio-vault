@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Arhitecture/Backend/DataBase/Postgress.md",
+                "file": "Recomanded structure exemple.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Postgress"
+              "title": "Recomanded structure exemple"
             }
           }
         ]
@@ -190,8 +190,8 @@
   },
   "active": "1704c07c1ffb9f13",
   "lastOpenFiles": [
+    "Arhitecture/Backend/DataBase/Postgress.md",
     "Arhitecture/Main design diagram.canvas",
-    "Recomanded structure exemple.md",
-    "Arhitecture/Backend/DataBase/Postgress.md"
+    "Recomanded structure exemple.md"
   ]
 }

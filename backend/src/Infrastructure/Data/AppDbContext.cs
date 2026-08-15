@@ -1,14 +1,14 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using MusicStream.Core.Domain.Entities;
+using MusicStream.Core.Entities;
 
 namespace MusicStream.Infrastructure.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<User>
 {
     public DbSet<AudioFile> AudioFiles => Set<AudioFile>();
     public DbSet<Song> Songs => Set<Song>();
     public DbSet<Playlist> Playlists => Set<Playlist>();
-    public DbSet<User> Users => Set<User>();
 
     public AppDbContext(DbContextOptions<AppDbContext> contextOptions) : base(contextOptions)
     {
@@ -20,12 +20,6 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(u => u.Id);// set primary key
-
-            // set uniq properties
-            entity.HasIndex(u => u.Email);
-            entity.HasIndex(u => u.Username);
-
             // convert propertie to string (in db) from enum (in obj)
             entity.Property(u => u.Role)
                 .HasConversion<string>();

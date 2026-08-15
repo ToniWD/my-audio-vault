@@ -1,4 +1,4 @@
-namespace MusicStream.Core.Domain.Entities;
+namespace MusicStream.Core.Entities;
 
 public class Song
 {

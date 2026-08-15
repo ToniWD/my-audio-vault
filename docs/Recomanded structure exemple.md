@@ -27,7 +27,7 @@ backend/
 │   │
 │   └── API/                          # Punctul de intrare (Presentation Layer)
 │       ├── Controllers/              # Endpoint-uri REST (sau Minimal APIs)
-│       ├── Middlewares/              # Tratare erori, autentificare, CORS
+│       ├── Extensions/              # Tratare erori, autentificare, CORS
 │       ├── Program.cs                # Dependency Injection (DI) & App Setup
 │       └── appsettings.json          # Configurații
 │

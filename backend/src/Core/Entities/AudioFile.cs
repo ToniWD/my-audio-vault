@@ -1,4 +1,4 @@
-namespace MusicStream.Core.Domain.Entities;
+namespace MusicStream.Core.Entities;
 
 public class AudioFile
 {
@@ -9,7 +9,7 @@ public class AudioFile
     public string ContentType { get; set; } = "audio/mpeg";
     public long FileSizeBytes { get; set; }
     public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
-    
+
     public AudioFile() { }
 
     public AudioFile(string filePath, string originalFileName, TimeSpan duration, string contentType, long fileSizeBytes)
