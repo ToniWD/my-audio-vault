@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace MusicStream.Application.DTOs;
 
 public record RegisterRequest(
@@ -6,4 +8,9 @@ public record RegisterRequest(
     string? LastName,
     string? Email,
     string? Password
-);
+) : IRequest<Guid>;
+
+public record LoginRequest(
+    string Email,
+    string Password
+) : IRequest<AuthenticationResponse>;

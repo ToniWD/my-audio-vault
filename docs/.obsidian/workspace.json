@@ -188,10 +188,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "1704c07c1ffb9f13",
+  "active": "fd1b22b9bc8d0299",
   "lastOpenFiles": [
+    "Recomanded structure exemple.md",
+    "Untitled.md",
     "Arhitecture/Backend/DataBase/Postgress.md",
-    "Arhitecture/Main design diagram.canvas",
-    "Recomanded structure exemple.md"
+    "Arhitecture/Main design diagram.canvas"
   ]
 }

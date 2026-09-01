@@ -12,4 +12,10 @@
   <Folder Name="/src/Infrastructure/">
     <Project Path="src/Infrastructure/MusicStream.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/src/IntegrationTests/">
+    <Project Path="src/IntegrationTests/MusicStream.IntegrationTests.csproj" />
+  </Folder>
+  <Folder Name="/src/UnitTests/">
+    <Project Path="src/UnitTests/MusicStream.UnitTests.csproj" />
+  </Folder>
 </Solution>

@@ -1,4 +1,4 @@
-namespace MusicStream.API.Configuration;
+namespace MusicStream.Application.Configuration;
 
 public record AuthenticationSettings
 {

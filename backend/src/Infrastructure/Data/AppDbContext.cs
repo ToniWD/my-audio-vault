@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using MusicStream.Core.Entities;
 
 namespace MusicStream.Infrastructure.Data;
 
-public class AppDbContext : IdentityDbContext<User>
+public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public DbSet<AudioFile> AudioFiles => Set<AudioFile>();
     public DbSet<Song> Songs => Set<Song>();

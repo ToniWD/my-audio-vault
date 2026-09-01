@@ -1,32 +1,22 @@
-using Microsoft.EntityFrameworkCore;
-using MusicStream.API.Configuration;
 using MusicStream.API.Extensions;
-using MusicStream.Infrastructure.Data;
+using MusicStream.Application.Configuration;
+using MusicStream.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddProblemDetails();
-
-// Configure DbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// JWT auth
 builder.Services.Configure<AuthenticationSettings>(builder.Configuration.GetSection("Authentication"));
-builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddAuthorization();
-builder.Services.AddIdentityServices();
+// Add services to the container.
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Endpoints auto validation
 builder.Services.AddRequestFluentValidation();
 // Global exception handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 

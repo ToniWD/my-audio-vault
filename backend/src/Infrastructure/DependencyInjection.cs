@@ -1,16 +1,36 @@
-using MusicStream.API.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MusicStream.Application.Configuration;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MusicStream.Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using MusicStream.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using MusicStream.Application.Interfaces;
+using MusicStream.Infrastructure.Identity;
 
-namespace MusicStream.API.Extensions;
+namespace MusicStream.Infrastructure;
 
-public static class AuthenticationExtensions
+public static class DependencyInjection
 {
-    public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddJwtAuthentication(configuration);
+        services.AddIdentityServices();
+        services.AddAuthorization();
+
+        // Used to detect all use cases services
+        services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssembly(typeof(MusicStream.Application.UseCases.CreateUserCommandHandler).Assembly)
+            );
+    }
+
+    private static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var authSettings = configuration.GetSection("Authentication").Get<AuthenticationSettings>();
 
@@ -36,11 +56,13 @@ public static class AuthenticationExtensions
                 )
             };
         });
+
+        services.AddSingleton<ITokenProvider, TokenProviderHelper>();
     }
 
-    public static void AddIdentityServices(this IServiceCollection services)
+    private static void AddIdentityServices(this IServiceCollection services)
     {
-        services.AddIdentity<User, IdentityRole>(options =>
+        services.AddIdentity<User, IdentityRole<Guid>>(options =>
         {
             options.Password.RequireDigit = true;
             options.Password.RequireUppercase = true;
@@ -57,3 +79,4 @@ public static class AuthenticationExtensions
         .AddDefaultTokenProviders();
     }
 }
+
