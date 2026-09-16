@@ -14,3 +14,7 @@ public record LoginRequest(
     string Email,
     string Password
 ) : IRequest<AuthenticationResponse>;
+
+public record RefreshTokenRequest(
+    string RefreshToken
+) : IRequest<AuthenticationResponse>;

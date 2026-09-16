@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MusicStream.Application.Configuration;
@@ -12,10 +13,12 @@ namespace MusicStream.Infrastructure.Identity;
 public class TokenProviderHelper : ITokenProvider
 {
     private readonly AuthenticationSettings _authSettings;
+    private readonly ILogger<TokenProviderHelper> _logger;
 
-    public TokenProviderHelper(IOptions<AuthenticationSettings> authSettings)
+    public TokenProviderHelper(IOptions<AuthenticationSettings> authSettings, ILogger<TokenProviderHelper> logger)
     {
         _authSettings = authSettings.Value;
+        _logger = logger;
     }
 
     public (string, DateTime) GenerateAccessToken(User user)
@@ -54,13 +57,19 @@ public class TokenProviderHelper : ITokenProvider
         var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var expirationDate = DateTime.UtcNow.AddHours(12);
 
+        var claims = new[]
+    {
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
+
         var jwtSecurityToken = new JwtSecurityToken(
-                      _authSettings.Issuer,
-                      _authSettings.Audience,
-                      null,
-                      DateTime.UtcNow,
-                      expirationDate,
-                      signingCredentials);
+            _authSettings.Issuer,
+            _authSettings.Audience,
+            claims,
+            DateTime.UtcNow,
+            expirationDate,
+            signingCredentials
+        );
 
         var tokenToReturn = new JwtSecurityTokenHandler()
            .WriteToken(jwtSecurityToken);
@@ -84,8 +93,16 @@ public class TokenProviderHelper : ITokenProvider
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var result = tokenHandler.ValidateToken(refreshToken, validationParameters, out _);
+        try
+        {
+            var result = tokenHandler.ValidateToken(refreshToken, validationParameters, out _);
+            return result != null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.StackTrace);
+            return false;
+        }
 
-        return result != null;
     }
 }

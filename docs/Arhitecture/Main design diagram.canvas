@@ -1,18 +1,16 @@
 {
 	"nodes":[
 		{"id":"70564a1dcafb398b","type":"text","text":".NET API (Backend)","x":0,"y":160,"width":250,"height":60,"color":"2"},
-		{"id":"9f727d4b8746649d","type":"text","text":"Web Interface\n- player\n- admin dashboard","x":-180,"y":-156,"width":235,"height":120},
-		{"id":"78e34d7fac3394eb","type":"text","text":"IOS App\n- player","x":160,"y":-152,"width":250,"height":113},
 		{"id":"674841d3b05e5eff","type":"text","text":"Extra modules (Another repo)","x":200,"y":428,"width":269,"height":59,"color":"4"},
 		{"id":"dac87b00bcde7faa","type":"text","text":"Youtube Scraper","x":200,"y":508,"width":269,"height":60,"color":"4"},
 		{"id":"93900bd34b3650de","type":"text","text":"Spotify Scraper","x":200,"y":582,"width":269,"height":60,"color":"4"},
 		{"id":"eec509ce81246c3b","type":"text","text":"[[Postgress]]\n(Metadata)","x":-300,"y":428,"width":168,"height":80,"color":"5"},
-		{"id":"e7e151affa28397a","type":"text","text":"Disk Storage \n(for audio and covers)","x":-102,"y":430,"width":205,"height":58,"color":"6"},
+		{"id":"e7e151affa28397a","type":"text","text":"[[Minio (Object Storage service)]] \n(AWS S3 alternative)","x":-102,"y":430,"width":262,"height":78,"color":"6"},
 		{"id":"838693f4005be62e","type":"text","text":"Background Job Queue\n(Hangfire / Channels)","x":210,"y":258,"width":250,"height":60,"color":"2"},
-		{"id":"fa5ab4b695f249c3","type":"text","text":"Streaming Engine\n(HTTP Range / HLS)","x":-227,"y":258,"width":250,"height":60,"color":"2"}
+		{"id":"fa5ab4b695f249c3","type":"text","text":"Streaming Engine\n(HTTP Range / HLS)","x":-227,"y":258,"width":250,"height":60,"color":"2"},
+		{"id":"78e34d7fac3394eb","type":"text","text":"## Frontend (React native, Expo)\n**IOS/Android App:**\n- player\n\n**Web Interface**\n- player\n- admin dashboard","x":-62,"y":-280,"width":375,"height":253}
 	],
 	"edges":[
-		{"id":"382b7b122bcd9812","fromNode":"9f727d4b8746649d","fromSide":"bottom","toNode":"70564a1dcafb398b","toSide":"top"},
 		{"id":"50f317485a5bb839","fromNode":"78e34d7fac3394eb","fromSide":"bottom","toNode":"70564a1dcafb398b","toSide":"top"},
 		{"id":"8305ea946dd2995e","fromNode":"fa5ab4b695f249c3","fromSide":"bottom","toNode":"eec509ce81246c3b","toSide":"top"},
 		{"id":"f5642e01f7d446cd","fromNode":"fa5ab4b695f249c3","fromSide":"bottom","toNode":"e7e151affa28397a","toSide":"top"},

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MusicStream.Application.DTOs;
+using MusicStream.Application.Interfaces;
 using MusicStream.Core.Entities;
 
 namespace MusicStream.IntegrationTests.Tests;
@@ -45,7 +46,7 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
 
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
         var result = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
         Assert.NotNull(result);
@@ -184,6 +185,87 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
+    private async Task<string> GetRefreshTokenForPreExistingUser()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+        var (user, _) = await GetPreExistingTestUserAsync();
+
+        var existingUser = await userManager.FindByEmailAsync(user.Email!);
+
+        if (existingUser is null)
+        {
+            throw new Exception("No user found.");
+        }
+
+        string? storedToken = await userManager.GetAuthenticationTokenAsync(
+            existingUser,
+            loginProvider: "JWT",
+            tokenName: "RefreshToken"
+        );
+
+        if (string.IsNullOrEmpty(storedToken))
+        {
+            var tokenProviderHelper = scope.ServiceProvider.GetRequiredService<ITokenProvider>();
+            storedToken = tokenProviderHelper.GenerateRefreshToken();
+            var result = await userManager.SetAuthenticationTokenAsync(
+                existingUser,
+                loginProvider: "JWT",
+                tokenName: "RefreshToken",
+                tokenValue: storedToken
+            );
+
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException("The refresh token can't be saved.");
+            }
+        }
+
+        return storedToken;
+    }
+
+    [Fact]
+    public async Task RefreshToken_WithValidToken_ReturnsNewTokens()
+    {
+        string refreshToken = await GetRefreshTokenForPreExistingUser();
+
+        var refreshRequest = new RefreshTokenRequest(
+            RefreshToken: refreshToken
+        );
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/refresh", refreshRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        string newRefreshToken = await GetRefreshTokenForPreExistingUser();
+
+        var result = await response.Content.ReadFromJsonAsync<AuthenticationResponse>();
+        Assert.NotNull(response);
+
+        Assert.False(string.IsNullOrWhiteSpace(result.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(result.RefreshToken));
+
+        Assert.NotEqual(refreshToken, result.RefreshToken);
+        Assert.Equal(newRefreshToken, result.RefreshToken);
+    }
+
+    [Fact]
+    public async Task Refresh_WithInvalidToken()
+    {
+        var refreshRequest = new RefreshTokenRequest(
+            RefreshToken: "wrongToken"
+        );
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/auth/refresh", refreshRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
     /// <summary>
     /// Gets a pre-existing test user or creates one.
     /// This user data should not be changed.
@@ -220,5 +302,4 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
 
         return (newUser, testPassword);
     }
-
 }

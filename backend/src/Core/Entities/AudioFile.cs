@@ -2,22 +2,22 @@ namespace MusicStream.Core.Entities;
 
 public class AudioFile
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
-    public string FilePath { get; set; } = string.Empty;
-    public string OriginalFileName { get; set; } = string.Empty;
-    public TimeSpan Duration { get; set; }
-    public string ContentType { get; set; } = "audio/mpeg";
-    public long FileSizeBytes { get; set; }
-    public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+    public required Guid Id { get; init; }
+    public required Guid SongId { get; init; }
 
-    public AudioFile() { }
+    public required string AudioUrl { get; set; }
+    public required string Format { get; init; }
+    public required string Quality { get; init; }
 
-    public AudioFile(string filePath, string originalFileName, TimeSpan duration, string contentType, long fileSizeBytes)
-    {
-        FilePath = filePath;
-        OriginalFileName = originalFileName;
-        Duration = duration;
-        ContentType = contentType;
-        FileSizeBytes = fileSizeBytes;
-    }
+    public required int DurationSeconds { get; init; }
+    public int BitrateKbps { get; init; }
+    public int SampleRateHz { get; init; }
+    public short Channels { get; init; } = 2;
+    public long FileSizeBytes { get; init; }
+
+    public string? Checksum { get; init; }
+
+    public IReadOnlyList<float> WaveformData { get; init; } = [];
+
+    public Song Song { get; init; } = null!;
 }

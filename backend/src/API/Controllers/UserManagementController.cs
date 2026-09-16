@@ -18,22 +18,36 @@ public class UserManagementController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest registerRequest)
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest registerRequest)
     {
         var userId = await _mediator.Send(registerRequest);
-        return Ok(new { UserId = userId });
+        return Created(string.Empty, new RegisterResponse(userId));
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthenticationResponse>> Login([FromBody] LoginRequest request)
+    {
+        var result = await _mediator.Send(request);
+        return Ok(result);
+    }
+
+    [HttpPost("refresh")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthenticationResponse>> Refresh([FromBody] RefreshTokenRequest request)
     {
         var result = await _mediator.Send(request);
         return Ok(result);
     }
 
     [HttpGet("health")]
-    public async Task<IActionResult> HealthCheck()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public ActionResult<HealthCheck> HealthCheck()
     {
-        return Ok();
+        return Ok(new HealthCheck("Healthy", DateTime.UtcNow));
     }
 }

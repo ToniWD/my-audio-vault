@@ -42,7 +42,12 @@ public class LoginUserHandler : IRequestHandler<LoginRequest, AuthenticationResp
         var (token, expiration) = _tokenProviderHelper.GenerateAccessToken(user);
         var refreshToken = _tokenProviderHelper.GenerateRefreshToken();
 
-        // TODO: Update refresh token in db
+        await _userManager.SetAuthenticationTokenAsync(
+                user,
+                loginProvider: "JWT",
+                tokenName: "RefreshToken",
+                tokenValue: refreshToken
+            );
 
         return new AuthenticationResponse(
             token,

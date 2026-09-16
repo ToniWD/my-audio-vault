@@ -1,0 +1,15 @@
+{
+	"nodes":[
+		{"id":"89e2b45e8e9a7006","x":-200,"y":-340,"width":250,"height":120,"color":"6","type":"text","text":"## API\nStartup project"},
+		{"id":"376950948575c98c","type":"text","text":"## Infrastructure\nConfigure and register services","x":100,"y":-340,"width":250,"height":120,"color":"5"},
+		{"id":"ab2ea0008f39ea1a","type":"text","text":"## Application\nBusiness logic ","x":-200,"y":-120,"width":550,"height":140,"color":"3"},
+		{"id":"fb4f6257121c3f26","x":-620,"y":-280,"width":250,"height":60,"color":"4","type":"text","text":"## IntegrationTests"},
+		{"id":"fd770a8792ce7395","type":"text","text":"## UnitTests","x":-620,"y":-200,"width":250,"height":60,"color":"4"},
+		{"id":"623eb28912e8f76a","type":"text","text":"## Core\nEntities, enums, interfaces etc.","x":-200,"y":40,"width":550,"height":100,"color":"1"}
+	],
+	"edges":[
+		{"id":"2de08e1988c8ded3","fromNode":"89e2b45e8e9a7006","fromSide":"bottom","toNode":"ab2ea0008f39ea1a","toSide":"top"},
+		{"id":"7ca717c8d82f6b24","fromNode":"376950948575c98c","fromSide":"bottom","toNode":"ab2ea0008f39ea1a","toSide":"top"},
+		{"id":"635d967824c0d430","fromNode":"ab2ea0008f39ea1a","fromSide":"bottom","toNode":"623eb28912e8f76a","toSide":"top"}
+	]
+}

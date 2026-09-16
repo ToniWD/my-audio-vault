@@ -10,6 +10,11 @@ using MusicStream.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using MusicStream.Application.Interfaces;
 using MusicStream.Infrastructure.Identity;
+using Amazon.S3;
+using Amazon.Runtime;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Logging;
+using Amazon.S3.Util;
 
 namespace MusicStream.Infrastructure;
 
@@ -17,17 +22,22 @@ public static class DependencyInjection
 {
     public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<AuthenticationSettings>(configuration.GetSection("Authentication"));
+        services.Configure<S3Settings>(configuration.GetSection("AWS"));
+
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddJwtAuthentication(configuration);
-        services.AddIdentityServices();
-        services.AddAuthorization();
 
         // Used to detect all use cases services
         services.AddMediatR(cfg =>
             cfg.RegisterServicesFromAssembly(typeof(MusicStream.Application.UseCases.CreateUserCommandHandler).Assembly)
             );
+
+        services.AddRepositoriesServices();
+
+        services.AddAWSServices(configuration);
     }
 
     private static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
@@ -58,6 +68,8 @@ public static class DependencyInjection
         });
 
         services.AddSingleton<ITokenProvider, TokenProviderHelper>();
+        services.AddIdentityServices();
+        services.AddAuthorization();
     }
 
     private static void AddIdentityServices(this IServiceCollection services)
@@ -77,6 +89,59 @@ public static class DependencyInjection
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
+    }
+
+    private static void AddRepositoriesServices(this IServiceCollection services)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
+    }
+
+    private static void AddAWSServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<IAmazonS3>(sp =>
+        {
+            var s3Settings = configuration.GetSection("AWS").Get<S3Settings>();
+            if (s3Settings is null) throw new Exception("No aws settings were provided in \"appsettings.json\"");
+
+
+            var credentials = new BasicAWSCredentials(s3Settings.AccessKey, s3Settings.SecretKey);
+            var s3Config = new AmazonS3Config
+            {
+                ServiceURL = s3Settings.ServiceUrl,
+                ForcePathStyle = s3Settings.ForcePathStyle
+            };
+
+            return new AmazonS3Client(credentials, s3Config);
+        });
+    }
+
+    public static async Task EnsureS3BucketCreatedAsync(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var s3Client = scope.ServiceProvider.GetRequiredService<IAmazonS3>();
+
+        var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+
+        var logger = loggerFactory.CreateLogger(nameof(DependencyInjection));
+
+        var bucketName = app.Configuration["AWS:BucketName"] ?? "vault";
+        logger.LogInformation($"Check if the \"{bucketName}\" bucket exists");
+
+        try
+        {
+            bool exists = await AmazonS3Util.DoesS3BucketExistV2Async(s3Client, bucketName);
+
+            if (!exists)
+            {
+                await s3Client.PutBucketAsync(bucketName);
+                logger.LogInformation("Bucket-ul S3/MinIO '{BucketName}' created.", bucketName);
+            }
+            else logger.LogInformation($"The \"{bucketName}\" bucket exists");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while verifying or creating the MinIO/S3 bucket '{BucketName}'.", bucketName);
+        }
     }
 }
 

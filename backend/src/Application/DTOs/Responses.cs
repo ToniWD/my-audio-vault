@@ -5,3 +5,10 @@ public record AuthenticationResponse(
     DateTime AccessTokenExpirationTime,
     string RefreshToken
 );
+
+public record HealthCheck(
+    string Status,
+    DateTime TimeStamp
+);
+
+public record RegisterResponse(Guid UserId);

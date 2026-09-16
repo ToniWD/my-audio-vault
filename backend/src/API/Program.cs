@@ -4,9 +4,20 @@ using MusicStream.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var allowExpoOrigin = "_allowExpoOrigin";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: allowExpoOrigin, policy =>
+    {
+        policy.WithOrigins("http://localhost:8081", "http://localhost:19006")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 
-builder.Services.Configure<AuthenticationSettings>(builder.Configuration.GetSection("Authentication"));
 // Add services to the container.
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
@@ -20,6 +31,9 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
+await app.EnsureS3BucketCreatedAsync();
+
+app.UseCors(allowExpoOrigin);
 app.UseAuthentication();
 app.UseAuthorization();
 

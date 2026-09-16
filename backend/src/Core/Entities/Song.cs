@@ -2,27 +2,34 @@ namespace MusicStream.Core.Entities;
 
 public class Song
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; private set; } = Guid.NewGuid();
 
-    public string Title { get; set; } = string.Empty;
-    public string? ThumbnailUrl { get; set; }
-    public string? ArtistName { get; set; }
-    public string? AlbumName { get; set; }
-    public string? Genre { get; set; }
+    public required string Title { get; set; }
+    public required string CoverImageUrl { get; set; }
+    public List<Guid> ArtistIds { get; set; } = [];
+    public Guid? AlbumId { get; set; }
 
-    public long PlayCount { get; set; } = 0;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public required string Genre { get; set; }
+    public DateOnly ReleaseDate { get; set; }
+    public bool IsExplicit { get; set; }
 
-    public Guid AudioFileId { get; set; }
-    public AudioFile AudioFile { get; set; } = null!;
+    public long PlayCount { get; private set; }
+    public int LikeCount { get; private set; }
 
-    public Song() { }
+    public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? UpdatedAt { get; private set; }
 
-    public Song(string title, Guid audioFileId, string? artistName = null, string? thumbnailUrl = null)
+    public ICollection<AudioFile> AudioFiles { get; set; } = new List<AudioFile>();
+
+    public void IncrementPlayCount()
     {
-        Title = title;
-        AudioFileId = audioFileId;
-        ArtistName = artistName;
-        ThumbnailUrl = thumbnailUrl;
+        PlayCount++;
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void UpdateLikes(int delta)
+    {
+        LikeCount = Math.Max(0, LikeCount + delta);
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 }
