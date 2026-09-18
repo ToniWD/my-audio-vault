@@ -158,57 +158,48 @@ namespace MusicStream.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<TimeSpan>("Duration")
-                        .HasColumnType("interval");
-
-                    b.Property<string>("FilePath")
+                    b.Property<string>("AudioUrl")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int>("BitrateKbps")
+                        .HasColumnType("integer");
+
+                    b.Property<short>("Channels")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("Checksum")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("DurationSeconds")
+                        .HasColumnType("integer");
+
                     b.Property<long>("FileSizeBytes")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("OriginalFileName")
+                    b.Property<string>("Format")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("Quality")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.HasKey("Id");
+                    b.Property<int>("SampleRateHz")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("FilePath")
-                        .IsUnique();
-
-                    b.ToTable("AudioFiles");
-                });
-
-            modelBuilder.Entity("MusicStream.Core.Entities.Playlist", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("SongId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Playlists");
+                    b.HasIndex("SongId");
+
+                    b.ToTable("AudioFiles");
                 });
 
             modelBuilder.Entity("MusicStream.Core.Entities.Song", b =>
@@ -217,34 +208,34 @@ namespace MusicStream.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("AlbumName")
-                        .HasColumnType("text");
+                    b.Property<string>("CoverImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Property<string>("ArtistName")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("AudioFileId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Genre")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
-                    b.Property<long>("PlayCount")
-                        .HasColumnType("bigint");
+                    b.Property<bool>("IsExplicit")
+                        .HasColumnType("boolean");
 
-                    b.Property<string>("ThumbnailUrl")
-                        .HasColumnType("text");
+                    b.Property<DateOnly>("ReleaseDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AudioFileId");
 
                     b.ToTable("Songs");
                 });
@@ -329,21 +320,6 @@ namespace MusicStream.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("PlaylistSong", b =>
-                {
-                    b.Property<Guid>("PlaylistId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("SongsId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("PlaylistId", "SongsId");
-
-                    b.HasIndex("SongsId");
-
-                    b.ToTable("PlaylistSongs", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -395,30 +371,20 @@ namespace MusicStream.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MusicStream.Core.Entities.Song", b =>
+            modelBuilder.Entity("MusicStream.Core.Entities.AudioFile", b =>
                 {
-                    b.HasOne("MusicStream.Core.Entities.AudioFile", "AudioFile")
-                        .WithMany()
-                        .HasForeignKey("AudioFileId")
+                    b.HasOne("MusicStream.Core.Entities.Song", "Song")
+                        .WithMany("AudioFiles")
+                        .HasForeignKey("SongId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("AudioFile");
+                    b.Navigation("Song");
                 });
 
-            modelBuilder.Entity("PlaylistSong", b =>
+            modelBuilder.Entity("MusicStream.Core.Entities.Song", b =>
                 {
-                    b.HasOne("MusicStream.Core.Entities.Playlist", null)
-                        .WithMany()
-                        .HasForeignKey("PlaylistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MusicStream.Core.Entities.Song", null)
-                        .WithMany()
-                        .HasForeignKey("SongsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("AudioFiles");
                 });
 #pragma warning restore 612, 618
         }

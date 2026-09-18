@@ -17,7 +17,5 @@ public class AudioFile
 
     public string? Checksum { get; init; }
 
-    public IReadOnlyList<float> WaveformData { get; init; } = [];
-
     public Song Song { get; init; } = null!;
 }

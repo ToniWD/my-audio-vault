@@ -1,6 +1,3 @@
-using System.Security.Claims;
-using MusicStream.Core.Entities;
-
 namespace MusicStream.Application.Interfaces;
 
 public interface ITokenProvider

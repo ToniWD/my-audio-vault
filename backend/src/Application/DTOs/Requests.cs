@@ -10,6 +10,21 @@ public record RegisterRequest(
     string? Password
 ) : IRequest<Guid>;
 
+public record PatchUserRequest(
+    string? Username = null,
+    string? FirstName = null,
+    string? LastName = null,
+    string? Email = null
+);
+
+public record PatchUserCommand(
+    Guid UserId,
+    string? Username = null,
+    string? FirstName = null,
+    string? LastName = null,
+    string? Email = null
+) : IRequest;
+
 public record LoginRequest(
     string Email,
     string Password

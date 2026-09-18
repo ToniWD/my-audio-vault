@@ -15,6 +15,7 @@ using Amazon.Runtime;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Amazon.S3.Util;
+using Microsoft.Extensions.Options;
 
 namespace MusicStream.Infrastructure;
 
@@ -48,33 +49,34 @@ public static class DependencyInjection
         {
             throw new Exception("No auth settings were provided in \"appsettings.json\"");
         }
+        services.AddIdentityServices();
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(jwtOptions =>
-        {
-            jwtOptions.TokenValidationParameters = new TokenValidationParameters
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
+
+        services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+            .Configure<IOptions<AuthenticationSettings>>((jwtOptions, authOptions) =>
             {
-                ClockSkew = TimeSpan.Zero,
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = authSettings.Issuer,
-                ValidAudience = authSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(authSettings.TokenSecret)
-                )
-            };
-        });
+                var settings = authOptions.Value;
+                jwtOptions.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ClockSkew = TimeSpan.Zero,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = settings.Issuer,
+                    ValidAudience = settings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.TokenSecret))
+                };
+            });
 
         services.AddSingleton<ITokenProvider, TokenProviderHelper>();
-        services.AddIdentityServices();
         services.AddAuthorization();
     }
 
     private static void AddIdentityServices(this IServiceCollection services)
     {
-        services.AddIdentity<User, IdentityRole<Guid>>(options =>
+        services.AddIdentityCore<User>(options =>
         {
             options.Password.RequireDigit = true;
             options.Password.RequireUppercase = true;

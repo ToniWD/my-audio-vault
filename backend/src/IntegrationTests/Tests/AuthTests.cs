@@ -1,20 +1,24 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MusicStream.Application.DTOs;
-using MusicStream.Application.Interfaces;
 using MusicStream.Core.Entities;
 
 namespace MusicStream.IntegrationTests.Tests;
 
-public class AuthTests : IClassFixture<CustomWebApplicationFactory>
+[Collection("IntegrationTestWithDBCollection")]
+public class AuthTests : IAsyncLifetime
 {
     private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
     private readonly ILogger<AuthTests> _logger;
+
+    // User is static because all test from this class (collection) work in sequential order,
+    // but for every test a new instance of this class is created 
+    private static User _sharedUser;
+    private static string _sharedUserPassword;
 
     public AuthTests(CustomWebApplicationFactory factory)
     {
@@ -26,6 +30,20 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
         _logger = loggerFactory.CreateLogger<AuthTests>();
     }
 
+    public async ValueTask InitializeAsync()
+    {
+        if (_sharedUser is null)
+        {
+            (_sharedUser, _sharedUserPassword) = await UserUtils.CreateUserDB(_factory);
+            _logger.LogInformation($"New user created for {this.GetType().Name} with id: {_sharedUser.Id}");
+        }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
 
     // Helper DTO
     private record RegisterResponseDto(Guid UserId);
@@ -35,10 +53,10 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
     {
         // Arrange
         var registerRequest = new RegisterRequest(
-            Username: "john_doe",
+            Username: "johndoeregistervalid",
             FirstName: "John",
             LastName: "Doe",
-            Email: "john.doe@example.com",
+            Email: $"john.doeregistervalid@example.com",
             Password: "Password123!"
         );
 
@@ -94,14 +112,11 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task Register_WithDuplicateEmail_ReturnsBadRequestOrConflict()
     {
-        // Arrange
-        var (existingUser, _) = await GetPreExistingTestUserAsync();
-
         var requestWithDuplicateEmail = new RegisterRequest(
-            Username: "completely_new_username",
+            Username: $"jane_{Guid.NewGuid():N}",
             FirstName: "Jane",
             LastName: "Doe",
-            Email: existingUser.Email!, // Already used email
+            Email: _sharedUser.Email, // Already used email
             Password: "Password123!"
         );
 
@@ -120,14 +135,11 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task Register_WithDuplicateUsername_ReturnsBadRequestOrConflict()
     {
-        // Arrange
-        var (existingUser, _) = await GetPreExistingTestUserAsync();
-
         var requestWithDuplicateUsername = new RegisterRequest(
-            Username: existingUser.UserName!, // Already used username
+            Username: _sharedUser.UserName, // Already used username
             FirstName: "Jane",
             LastName: "Doe",
-            Email: "new.email.address@example.com",
+            Email: $"new.email{Guid.NewGuid():N}@example.com",
             Password: "Password123!"
         );
 
@@ -146,12 +158,9 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
     [Fact]
     public async Task Login_WithValidCredentials_ReturnsOkAndTokens()
     {
-        // Prerequire: Add a user
-        var (user, password) = await GetPreExistingTestUserAsync();
-
         var loginRequest = new LoginRequest(
-            Email: user.Email!,
-            Password: password
+            Email: _sharedUser.Email!,
+            Password: _sharedUserPassword
         );
 
         // Act
@@ -173,9 +182,6 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
     [InlineData("user.test.auth@example.com", "WrongPassword123!")]   // Wrong password
     public async Task Login_WithInvalidCredentials_ReturnsUnauthorized(string testEmail, string testPassword)
     {
-        // Make sure the test user exists
-        await GetPreExistingTestUserAsync();
-
         var loginRequest = new LoginRequest(testEmail, testPassword);
 
         // Act
@@ -185,50 +191,10 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
-    private async Task<string> GetRefreshTokenForPreExistingUser()
-    {
-        using var scope = _factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-        var (user, _) = await GetPreExistingTestUserAsync();
-
-        var existingUser = await userManager.FindByEmailAsync(user.Email!);
-
-        if (existingUser is null)
-        {
-            throw new Exception("No user found.");
-        }
-
-        string? storedToken = await userManager.GetAuthenticationTokenAsync(
-            existingUser,
-            loginProvider: "JWT",
-            tokenName: "RefreshToken"
-        );
-
-        if (string.IsNullOrEmpty(storedToken))
-        {
-            var tokenProviderHelper = scope.ServiceProvider.GetRequiredService<ITokenProvider>();
-            storedToken = tokenProviderHelper.GenerateRefreshToken();
-            var result = await userManager.SetAuthenticationTokenAsync(
-                existingUser,
-                loginProvider: "JWT",
-                tokenName: "RefreshToken",
-                tokenValue: storedToken
-            );
-
-            if (!result.Succeeded)
-            {
-                throw new InvalidOperationException("The refresh token can't be saved.");
-            }
-        }
-
-        return storedToken;
-    }
-
     [Fact]
     public async Task RefreshToken_WithValidToken_ReturnsNewTokens()
     {
-        string refreshToken = await GetRefreshTokenForPreExistingUser();
+        string refreshToken = await UserUtils.GetRefreshTokenForExistingUser(_sharedUser.Id.ToString(), _factory);
 
         var refreshRequest = new RefreshTokenRequest(
             RefreshToken: refreshToken
@@ -240,7 +206,7 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        string newRefreshToken = await GetRefreshTokenForPreExistingUser();
+        string newRefreshToken = await UserUtils.GetRefreshTokenForExistingUser(_sharedUser.Id.ToString(), _factory);
 
         var result = await response.Content.ReadFromJsonAsync<AuthenticationResponse>();
         Assert.NotNull(response);
@@ -264,42 +230,5 @@ public class AuthTests : IClassFixture<CustomWebApplicationFactory>
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-    }
-
-    /// <summary>
-    /// Gets a pre-existing test user or creates one.
-    /// This user data should not be changed.
-    /// </summary>
-    private async Task<(User User, string Password)> GetPreExistingTestUserAsync()
-    {
-        const string testEmail = "user.test.auth@example.com";
-        const string testPassword = "Password123!";
-        const string testUsername = "userTestAuth";
-
-        using var scope = _factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-
-        var existingUser = await userManager.FindByEmailAsync(testEmail);
-
-        if (existingUser is not null)
-        {
-            return (existingUser, testPassword);
-        }
-
-        var newUser = new User
-        {
-            UserName = testUsername,
-            Email = testEmail
-        };
-
-        var createResult = await userManager.CreateAsync(newUser, testPassword);
-
-        if (!createResult.Succeeded)
-        {
-            var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-            throw new InvalidOperationException($"Could not create test user '{testEmail}': {errors}");
-        }
-
-        return (newUser, testPassword);
     }
 }
