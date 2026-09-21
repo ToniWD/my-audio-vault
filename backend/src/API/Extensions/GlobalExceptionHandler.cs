@@ -44,6 +44,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             {
                 NotFoundException => StatusCodes.Status404NotFound,
                 UnauthorizedException => StatusCodes.Status401Unauthorized,
+                Forbidden => StatusCodes.Status403Forbidden,
                 _ => StatusCodes.Status400BadRequest
             };
 

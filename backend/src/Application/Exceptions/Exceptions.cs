@@ -15,6 +15,11 @@ public class NotFoundException : AppException
     public NotFoundException(string message) : base(message) { }
 }
 
+public class Forbidden : AppException
+{
+    public Forbidden(string message) : base(message) { }
+}
+
 public class UnauthorizedException : AppException
 {
     public UnauthorizedException(string message = "Not authorized.")

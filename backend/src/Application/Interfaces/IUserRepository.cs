@@ -1,3 +1,4 @@
+using MusicStream.Application.DTOs;
 using MusicStream.Core.Entities;
 
 namespace MusicStream.Application.Interfaces;
@@ -5,4 +6,7 @@ namespace MusicStream.Application.Interfaces;
 public interface IUserRepository
 {
     Task<Guid?> GetUserIdByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
+    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<UserDTO?> GetProfileDtoByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<int> CheckHowManyAdminsExists(List<Guid>? except = null);
 }

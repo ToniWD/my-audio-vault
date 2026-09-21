@@ -33,3 +33,7 @@ public record LoginRequest(
 public record RefreshTokenRequest(
     string RefreshToken
 ) : IRequest<AuthenticationResponse>;
+
+public record DeleteAccountRequest(
+    string Password
+);

@@ -2,25 +2,18 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MusicStream.Application.DTOs;
-using MusicStream.Core.Entities;
 
 namespace MusicStream.IntegrationTests.Tests;
 
 [Collection("IntegrationTestWithDBCollection")]
-public class UserManagementTests : IAsyncLifetime
+public class UserManagementTests
 {
     private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
     private readonly ILogger<UserManagementTests> _logger;
-
-    // User is static because all test from this class (collection) work in sequential order,
-    // but for every test a new instance of this class is created 
-    private static User _sharedUser;
-    private static string _sharedUserPassword;
 
     public UserManagementTests(CustomWebApplicationFactory factory)
     {
@@ -31,19 +24,6 @@ public class UserManagementTests : IAsyncLifetime
         var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger<UserManagementTests>();
     }
-    public async ValueTask InitializeAsync()
-    {
-        if (_sharedUser is null)
-        {
-            (_sharedUser, _sharedUserPassword) = await UserUtils.CreateUserDB(_factory);
-            _logger.LogInformation($"New user created for {this.GetType().Name} with id: {_sharedUser.Id}");
-        }
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
 
     [Theory]
     [InlineData("alex12", "Alex", "Jobs", "alex12test@example.com")]
@@ -52,41 +32,51 @@ public class UserManagementTests : IAsyncLifetime
     [InlineData(null, null, "OnlyLastName", null)]
     [InlineData(null, null, null, "onlyemail@example.com")]
     [InlineData("Username", null, "LastName", null)]
-    public async Task PatchProfile_WithValidData_ReturnNoContent(
-    string? username, string? firstName, string? lastName, string? email)
+    public async Task PatchProfile_WithValidData_ReturnsNoContent(string? username, string? firstName, string? lastName, string? email)
     {
         var (testUser, _) = await UserUtils.CreateUserDB(_factory);
 
-        var accessToken = await UserUtils.GetAccessTokenForExistingUser(testUser.Id.ToString(), _factory);
-
-        var request = new PatchUserRequest(
-            Username: username,
-            FirstName: firstName,
-            LastName: lastName,
-            Email: email
-        );
-
-        var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+        try
         {
-            Content = JsonContent.Create(request)
-        };
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(testUser.Id.ToString(), _factory);
 
-        httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var request = new PatchUserRequest(
+                Username: username,
+                FirstName: firstName,
+                LastName: lastName,
+                Email: email
+            );
 
-        // Act
-        var response = await _client.SendAsync(httpRequest);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
 
-        // Assert StatusCode
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var updatedUser = await UserUtils.GetExistingUser(testUser.Id.ToString(), _factory);
+            // Act
+            var response = await _client.SendAsync(httpRequest);
 
-        Assert.Equal(username ?? testUser.UserName, updatedUser.UserName);
-        Assert.Equal(firstName ?? testUser.FirstName, updatedUser.FirstName);
-        Assert.Equal(lastName ?? testUser.LastName, updatedUser.LastName);
-        Assert.Equal(email ?? testUser.Email, updatedUser.Email);
+            // Assert StatusCode
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-        await UserUtils.DeleteExistingUser(updatedUser, _factory);
+            var updatedUser = await UserUtils.GetExistingUser(testUser.Id.ToString(), _factory);
+
+            Assert.NotNull(updatedUser);
+
+            Assert.Equal(username ?? testUser.UserName, updatedUser.UserName);
+            Assert.Equal(firstName ?? testUser.FirstName, updatedUser.FirstName);
+            Assert.Equal(lastName ?? testUser.LastName, updatedUser.LastName);
+            Assert.Equal(email ?? testUser.Email, updatedUser.Email);
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(testUser.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
     }
 
     [Theory]
@@ -103,68 +93,334 @@ public class UserManagementTests : IAsyncLifetime
     [InlineData(null, null, "Doe", "")]
     // No payload
     [InlineData(null, null, null, null)]
-    public async Task PatchProfile_WithInvalidData_ReturnBadRequest(
-        string? username, string? firstName, string? lastName, string? email
-    )
+    public async Task PatchProfile_WithInvalidData_ReturnsBadRequest(string? username, string? firstName, string? lastName, string? email)
     {
         var (testUser, _) = await UserUtils.CreateUserDB(_factory);
 
-        var accessToken = await UserUtils.GetAccessTokenForExistingUser(testUser.Id.ToString(), _factory);
-
-        var request = new PatchUserRequest(
-            Username: username,
-            FirstName: firstName,
-            LastName: lastName,
-            Email: email
-        );
-
-        var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+        try
         {
-            Content = JsonContent.Create(request)
-        };
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(testUser.Id.ToString(), _factory);
 
-        httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var request = new PatchUserRequest(
+                Username: username,
+                FirstName: firstName,
+                LastName: lastName,
+                Email: email
+            );
 
-        // Act
-        var response = await _client.SendAsync(httpRequest);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
 
-        // Assert StatusCode
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        var updatedUser = await UserUtils.GetExistingUser(testUser.Id.ToString(), _factory);
+            // Act
+            var response = await _client.SendAsync(httpRequest);
 
-        Assert.Equal(testUser.UserName, updatedUser.UserName);
-        Assert.Equal(testUser.FirstName, updatedUser.FirstName);
-        Assert.Equal(testUser.LastName, updatedUser.LastName);
-        Assert.Equal(testUser.Email, updatedUser.Email);
+            // Assert StatusCode
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-        await UserUtils.DeleteExistingUser(updatedUser, _factory);
+            var updatedUser = await UserUtils.GetExistingUser(testUser.Id.ToString(), _factory);
+
+            Assert.NotNull(updatedUser);
+            Assert.Equal(testUser.UserName, updatedUser.UserName);
+            Assert.Equal(testUser.FirstName, updatedUser.FirstName);
+            Assert.Equal(testUser.LastName, updatedUser.LastName);
+            Assert.Equal(testUser.Email, updatedUser.Email);
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(testUser.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
     }
 
     [Fact]
-    public async Task PatchProfile_WithInvalidAccessToken_ReturnBadRequest()
+    public async Task PatchProfile_WithInvalidAccessToken_ReturnsUnauthorized()
     {
-        var accessToken = await UserUtils.GetAccessTokenForExistingUser(_sharedUser.Id.ToString(), _factory);
-        StringBuilder sb = new StringBuilder(accessToken);
-
-        if (sb[32] != 'c') sb[32] += 'c';
-        else sb[32] = 'a';
-
-        var request = new PatchUserRequest(
-            FirstName: "OtherName"
-        );
-
-        var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+        var (testUser, _) = await UserUtils.CreateUserDB(_factory);
+        try
         {
-            Content = JsonContent.Create(request)
-        };
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(testUser.Id.ToString(), _factory);
+            StringBuilder sb = new StringBuilder(accessToken);
 
-        httpRequest.Headers.Authorization =
-            new AuthenticationHeaderValue("Bearer", sb.ToString());
+            if (sb[32] != 'c') sb[32] += 'c';
+            else sb[32] = 'a';
 
-        var response = await _client.SendAsync(httpRequest);
+            var request = new PatchUserRequest(
+                FirstName: "OtherName"
+            );
 
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", sb.ToString());
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(testUser.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
     }
 
+    [Fact]
+    public async Task PatchProfile_WithExistingUsername_ReturnsBadRequest()
+    {
+        var (user1, _) = await UserUtils.CreateUserDB(_factory);
+        var (user2, _) = await UserUtils.CreateUserDB(_factory);
+
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user1.Id.ToString(), _factory);
+
+            var request = new PatchUserRequest(
+                Username: user2.UserName
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            // Act
+            var response = await _client.SendAsync(httpRequest);
+
+            // Assert StatusCode
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var updatedUser = await UserUtils.GetExistingUser(user1.Id.ToString(), _factory);
+
+            Assert.NotNull(updatedUser);
+            Assert.Equal(user1.UserName, updatedUser.UserName);
+            Assert.NotEqual(user2.UserName, updatedUser.UserName);
+        }
+        finally
+        {
+            var existingUser1 = await UserUtils.GetExistingUser(user1.Id.ToString(), _factory);
+            if (existingUser1 is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser1, _factory);
+            }
+
+            var existingUser2 = await UserUtils.GetExistingUser(user2.Id.ToString(), _factory);
+            if (existingUser2 is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser2, _factory);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task PatchProfile_WithExistingEmail_ReturnsBadRequest()
+    {
+        var (user1, _) = await UserUtils.CreateUserDB(_factory);
+        var (user2, _) = await UserUtils.CreateUserDB(_factory);
+
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user1.Id.ToString(), _factory);
+
+            var request = new PatchUserRequest(
+                Email: user2.Email
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Patch, "/api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            // Act
+            var response = await _client.SendAsync(httpRequest);
+
+            // Assert StatusCode
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var updatedUser = await UserUtils.GetExistingUser(user1.Id.ToString(), _factory);
+
+            Assert.NotNull(updatedUser);
+            Assert.Equal(user1.Email, updatedUser.Email);
+            Assert.NotEqual(user2.Email, updatedUser.Email);
+        }
+        finally
+        {
+            var existingUser1 = await UserUtils.GetExistingUser(user1.Id.ToString(), _factory);
+            if (existingUser1 is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser1, _factory);
+            }
+
+            var existingUser2 = await UserUtils.GetExistingUser(user2.Id.ToString(), _factory);
+            if (existingUser2 is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser2, _factory);
+            }
+        }
+    }
+
+
+    [Fact]
+    public async Task GetProfile_OfSelf_WithValidToken_ReturnsOk()
+    {
+        var (user, _) = await UserUtils.CreateUserDB(_factory);
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user.Id.ToString(), _factory);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, "/api/users/me");
+
+            httpRequest.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var userProfile = await response.Content.ReadFromJsonAsync<UserDTO>();
+
+            Assert.NotNull(userProfile);
+            Assert.Equal(user.Id, userProfile.Id);
+            Assert.Equal(user.UserName, userProfile.Username);
+            Assert.Equal(user.Email, userProfile.Email);
+            Assert.Equal(user.FirstName, userProfile.FirstName);
+            Assert.Equal(user.LastName, userProfile.LastName);
+            Assert.Equal(user.Role, userProfile.Role);
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(user.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task GetProfile_OfSelf_WithInvalidToken_ReturnsUnauthorized()
+    {
+        var (user, _) = await UserUtils.CreateUserDB(_factory);
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user.Id.ToString(), _factory);
+            StringBuilder sb = new StringBuilder(accessToken);
+
+            if (sb[32] != 'c') sb[32] += 'c';
+            else sb[32] = 'a';
+
+            var request = new PatchUserRequest(
+                FirstName: "OtherName"
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, "/api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", sb.ToString());
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(user.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task DeleteAccount_WithValidPassword_ReturnsNoContent()
+    {
+        var (user, password) = await UserUtils.CreateUserDB(_factory);
+
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user.Id.ToString(), _factory);
+
+            var request = new DeleteAccountRequest(
+                Password: password
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+            Assert.Null(await UserUtils.GetExistingUser(user.Id.ToString(), _factory));
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(user.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
+    }
+
+
+    [Fact]
+    public async Task DeleteAccount_WithInvalidPassword_ReturnsBadRequest()
+    {
+        var (user, password) = await UserUtils.CreateUserDB(_factory);
+
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user.Id.ToString(), _factory);
+
+            var request = new DeleteAccountRequest(
+                Password: $"{password}a"
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Delete, "api/users/me")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            Assert.NotNull(await UserUtils.GetExistingUser(user.Id.ToString(), _factory));
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(user.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
+    }
 }

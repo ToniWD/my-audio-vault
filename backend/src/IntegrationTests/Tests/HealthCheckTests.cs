@@ -16,7 +16,7 @@ public class HealthCheckTests : IClassFixture<CustomWebApplicationFactory>
     /// </summary>
     /// <returns></returns>
     [Fact]
-    public async Task GetHealth_ReturnsSuccessStatusCode()
+    public async Task GetHealth_ReturnsOk()
     {
         var response = await _client.GetAsync("/api/auth/health");
 

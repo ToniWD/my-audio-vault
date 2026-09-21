@@ -1,3 +1,5 @@
+using MusicStream.Core.Enums;
+
 namespace MusicStream.Application.DTOs;
 
 public record AuthenticationResponse(
@@ -12,3 +14,12 @@ public record HealthCheck(
 );
 
 public record RegisterResponse(Guid UserId);
+
+public record UserDTO(
+        Guid Id,
+        string Username,
+        string FirstName,
+        string LastName,
+        string Email,
+        UserRole Role
+    );

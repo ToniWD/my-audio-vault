@@ -49,7 +49,7 @@ public class AuthTests : IAsyncLifetime
     private record RegisterResponseDto(Guid UserId);
 
     [Fact]
-    public async Task Register_WithValidData_ReturnsOkAndUserId()
+    public async Task Register_WithValidData_ReturnsCreated()
     {
         // Arrange
         var registerRequest = new RegisterRequest(
@@ -87,7 +87,7 @@ public class AuthTests : IAsyncLifetime
     // Invalid password
     [InlineData("valid_user", "John", "Doe", "john@example.com", "pass123!")]
     [InlineData("valid_user", "John", "Doe", "john@example.com", "SHORT1!")]
-    public async Task Register_WithInvalidValidationRules_ReturnsBadRequest(
+    public async Task Register_WithInvalidData_ReturnsBadRequest(
     string username, string firstName, string lastName, string email, string password)
     {
         // Arrange
@@ -156,7 +156,7 @@ public class AuthTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Login_WithValidCredentials_ReturnsOkAndTokens()
+    public async Task Login_WithValidCredentials_ReturnsOk()
     {
         var loginRequest = new LoginRequest(
             Email: _sharedUser.Email!,
@@ -219,7 +219,7 @@ public class AuthTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Refresh_WithInvalidToken()
+    public async Task RefreshToken_WithInvalidToken_ReturnsUnauthorized()
     {
         var refreshRequest = new RefreshTokenRequest(
             RefreshToken: "wrongToken"

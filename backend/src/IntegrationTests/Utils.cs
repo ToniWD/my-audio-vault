@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using MusicStream.Application.Interfaces;
 using MusicStream.Core.Entities;
+using MusicStream.Core.Enums;
 
 namespace MusicStream.IntegrationTests;
 
@@ -11,7 +12,7 @@ public static class UserUtils
     /// Gets a pre-existing test user or creates one.
     /// This user data should not be changed.
     /// </summary>
-    public static async Task<(User User, string Password)> CreateUserDB(CustomWebApplicationFactory factory)
+    public static async Task<(User User, string Password)> CreateUserDB(CustomWebApplicationFactory factory, UserRole role = UserRole.Member)
     {
         User user = new User();
 
@@ -33,7 +34,8 @@ public static class UserUtils
             UserName = username,
             Email = email,
             FirstName = "FnameGen",
-            LastName = "LnameGen"
+            LastName = "LnameGen",
+            Role = role
         };
 
         var createResult = await userManager.CreateAsync(newUser, password);
@@ -102,17 +104,12 @@ public static class UserUtils
 
         return storedToken;
     }
-    public static async Task<User> GetExistingUser(string userId, CustomWebApplicationFactory factory)
+    public static async Task<User?> GetExistingUser(string userId, CustomWebApplicationFactory factory)
     {
         using var scope = factory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
         var existingUser = await userManager.FindByIdAsync(userId);
-
-        if (existingUser is null)
-        {
-            throw new Exception($"No user found with the id: {userId}");
-        }
 
         return existingUser;
     }
