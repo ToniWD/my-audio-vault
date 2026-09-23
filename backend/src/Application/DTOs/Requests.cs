@@ -37,3 +37,8 @@ public record RefreshTokenRequest(
 public record DeleteAccountRequest(
     string Password
 );
+
+public record ChangePasswordRequest(
+    string CurrentPassword,
+    string NewPassword
+);

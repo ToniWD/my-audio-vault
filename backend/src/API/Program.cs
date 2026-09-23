@@ -32,6 +32,7 @@ builder.Services.AddProblemDetails();
 var app = builder.Build();
 
 await app.EnsureS3BucketCreatedAsync();
+await app.SeedDatabaseAsync();
 
 app.UseCors(allowExpoOrigin);
 app.UseAuthentication();

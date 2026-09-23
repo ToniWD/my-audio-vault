@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Amazon.S3.Util;
 using Microsoft.Extensions.Options;
+using MediatR;
+using MusicStream.Application.UseCases;
 
 namespace MusicStream.Infrastructure;
 
@@ -143,6 +145,30 @@ public static class DependencyInjection
         catch (Exception ex)
         {
             logger.LogError(ex, "An error occurred while verifying or creating the MinIO/S3 bucket '{BucketName}'.", bucketName);
+        }
+    }
+
+    public static async Task SeedDatabaseAsync(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+        var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
+        var logger = loggerFactory.CreateLogger("DatabaseSeeding");
+
+        var request = new SeedFirstAdminCommand();
+        var userCredentials = await mediator.Send(request);
+
+        if (userCredentials is not null)
+        {
+            logger.LogWarning(
+                "==========================================================\n" +
+                "INITIAL ADMIN CREATED SUCCESSFULLY!\n" +
+                "Username: {Username}\n" +
+                "Temporary Password: {Password}\n" +
+                "PLEASE CHANGE THIS PASSWORD IMMEDIATELY AFTER FIRST LOGIN!\n" +
+                "==========================================================",
+                userCredentials.Username,
+                userCredentials.Password);
         }
     }
 }

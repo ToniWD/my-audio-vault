@@ -114,6 +114,16 @@ public static class UserUtils
         return existingUser;
     }
 
+    public static async Task<User?> GetExistingUserByUsername(string username, CustomWebApplicationFactory factory)
+    {
+        using var scope = factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+
+        var existingUser = await userManager.FindByNameAsync(username);
+
+        return existingUser;
+    }
+
     public static async Task DeleteExistingUser(User user, CustomWebApplicationFactory factory)
     {
         using var scope = factory.Services.CreateScope();

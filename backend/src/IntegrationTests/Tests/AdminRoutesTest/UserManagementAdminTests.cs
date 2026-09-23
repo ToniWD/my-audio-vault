@@ -36,6 +36,12 @@ public class UserManagementAdminTests : IAsyncLifetime
     {
         if (_sharedAdmin is null)
         {
+            var user = await UserUtils.GetExistingUserByUsername("admin", _factory);
+
+            if (user is not null && user.Role == UserRole.Admin)
+            {
+                await UserUtils.DeleteExistingUser(user, _factory);
+            }
             (_sharedAdmin, _sharedAdminPassword) = await UserUtils.CreateUserDB(_factory, UserRole.Admin);
             _logger.LogInformation($"New admin created for {this.GetType().Name} with id: {_sharedAdmin.Id}");
         }

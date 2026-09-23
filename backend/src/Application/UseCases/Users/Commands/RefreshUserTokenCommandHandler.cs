@@ -48,6 +48,19 @@ public class RefreshUserToken : IRequestHandler<RefreshTokenRequest, Authenticat
             throw new UnauthorizedException("Invalid or expired refresh token.");
         }
 
+        var storedRefreshToken = await _userManager.GetAuthenticationTokenAsync(
+            user,
+            loginProvider: "JWT",
+            tokenName: "RefreshToken"
+        );
+
+        if (storedRefreshToken != request.RefreshToken)
+        {
+            _logger.LogWarning($"Refresh token mismatch for user {user.Id}. Token might have been revoked or reused.");
+
+            throw new UnauthorizedException("Invalid or expired refresh token.");
+        }
+
         var (newToken, expiration) = _tokenProviderHelper.GenerateAccessToken(user);
         var newRefreshToken = _tokenProviderHelper.GenerateRefreshToken();
 

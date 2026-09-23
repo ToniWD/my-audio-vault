@@ -1,5 +1,5 @@
 import { isTokenExpired } from "@/utils/JwtUtils";
-import { tokenStorage } from "./storage/TokenStorageService.web";
+import { tokenStorage } from "./storage/TokenStorageService";
 import { postApiAuthRefresh } from "@/api";
 import { publicClient } from "./authSetup";
 

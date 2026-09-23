@@ -1,11 +1,9 @@
 using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MusicStream.Application.DTOs;
 using MusicStream.Application.UseCases;
-using MusicStream.Core.Enums;
 
 
 namespace MusicStream.API.Controllers;
@@ -52,6 +50,30 @@ public class UserManagementController : ControllerBase
         var data = await _mediator.Send(new GetUserProfileByIdQuery(userId));
 
         return Ok(data);
+    }
+
+    [HttpPut("me/password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var command = new ChangeUserPasswordCommand(
+                UserId: userId,
+                CurrentPassword: request.CurrentPassword,
+                NewPassword: request.NewPassword
+            );
+
+        await _mediator.Send(command);
+
+        return new NoContentResult();
     }
 
     [HttpPatch("me")]

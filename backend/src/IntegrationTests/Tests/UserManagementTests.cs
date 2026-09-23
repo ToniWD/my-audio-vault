@@ -387,7 +387,6 @@ public class UserManagementTests
         }
     }
 
-
     [Fact]
     public async Task DeleteAccount_WithInvalidPassword_ReturnsBadRequest()
     {
@@ -413,6 +412,130 @@ public class UserManagementTests
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
             Assert.NotNull(await UserUtils.GetExistingUser(user.Id.ToString(), _factory));
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(user.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task ChangePassword_WithValidPassword_ReturnsNoContent()
+    {
+        var (user, password) = await UserUtils.CreateUserDB(_factory);
+
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user.Id.ToString(), _factory);
+            var refreshToken = await UserUtils.GetRefreshTokenForExistingUser(user.Id.ToString(), _factory);
+
+            var request = new ChangePasswordRequest(
+                CurrentPassword: password,
+                NewPassword: "testPASsss324@#!"
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Put, "api/users/me/password")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+            var newRefreshToken = await UserUtils.GetRefreshTokenForExistingUser(user.Id.ToString(), _factory);
+
+            Assert.NotEqual(refreshToken, newRefreshToken);
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(user.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("newPass")]
+    [InlineData("P23")]
+    [InlineData("@132s")]
+    public async Task ChangePassword_WithInvalidPassword_ReturnsBadRequest(string newPassword)
+    {
+        var (user, password) = await UserUtils.CreateUserDB(_factory);
+
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user.Id.ToString(), _factory);
+            var refreshToken = await UserUtils.GetRefreshTokenForExistingUser(user.Id.ToString(), _factory);
+
+            var request = new ChangePasswordRequest(
+                CurrentPassword: password,
+                NewPassword: newPassword
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Put, "api/users/me/password")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var newRefreshToken = await UserUtils.GetRefreshTokenForExistingUser(user.Id.ToString(), _factory);
+
+            Assert.Equal(refreshToken, newRefreshToken);
+        }
+        finally
+        {
+            var existingUser = await UserUtils.GetExistingUser(user.Id.ToString(), _factory);
+            if (existingUser is not null)
+            {
+                await UserUtils.DeleteExistingUser(existingUser, _factory);
+            }
+        }
+    }
+
+    [Fact]
+    public async Task ChangePassword_WithWrongCurrentPassword_ReturnsBadRequest()
+    {
+        var (user, _) = await UserUtils.CreateUserDB(_factory);
+
+        try
+        {
+            var accessToken = await UserUtils.GetAccessTokenForExistingUser(user.Id.ToString(), _factory);
+            var refreshToken = await UserUtils.GetRefreshTokenForExistingUser(user.Id.ToString(), _factory);
+
+            var request = new ChangePasswordRequest(
+                CurrentPassword: "${password}as",
+                NewPassword: "testPASsss324@#!"
+            );
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Put, "api/users/me/password")
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+            var response = await _client.SendAsync(httpRequest);
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            var newRefreshToken = await UserUtils.GetRefreshTokenForExistingUser(user.Id.ToString(), _factory);
+
+            Assert.Equal(refreshToken, newRefreshToken);
         }
         finally
         {
