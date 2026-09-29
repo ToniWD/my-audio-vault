@@ -1,0 +1,26 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5434;Database=music_stream_db;Username=my_username;Password=my_password"
+  },
+  "Authentication": {
+    "TokenSecret": "this_is_the_secret_for_generating_a_key(mustbeatleast32bitlong)",
+    "RefreshTokenSecret": "this_is_the_secret_for_generating_a_key(mustbeatleast32bitlong)",
+    "Issuer": "http://localhost:5204",
+    "Audience": "http://localhost:8081/"
+  },
+  "AWS": {
+    "AccessKey": "key",
+    "SecretKey": "key",
+    "BucketName": "audio-vault",
+    "Region": "eu-central-1",
+    "ServiceUrl": "http://localhost:9000",
+    "ForcePathStyle": true
+  }
+}

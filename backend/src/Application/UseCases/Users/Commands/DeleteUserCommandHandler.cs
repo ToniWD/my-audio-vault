@@ -35,7 +35,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand>
         {
             if (string.IsNullOrWhiteSpace(request.Password) || !await _userManager.CheckPasswordAsync(user, request.Password))
             {
-                throw new AppException("Invalid password. Account deletion requires a valid password.");
+                throw new AppException("Invalid password. Account deletion requires the current password.");
             }
         }
 

@@ -3,7 +3,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { useAuth } from './useAuth';
 
 export function useProtectedRoute() {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const segments = useSegments();
     const router = useRouter();
 
@@ -11,11 +11,21 @@ export function useProtectedRoute() {
         if (isLoading) return;
 
         const inAuthGroup = segments[0] === '(auth)';
+        const inAdminGroup = segments[0] === '(admin)';
 
         if (!isAuthenticated && !inAuthGroup) {
             router.replace('/(auth)/login');
-        } else if (isAuthenticated && inAuthGroup) {
-            router.replace('/(main)');
+            return;
         }
-    }, [isAuthenticated, isLoading, segments]);
+
+        if (isAuthenticated && inAuthGroup) {
+            router.replace('/(main)');
+            return;
+        }
+
+        if (inAdminGroup && user?.role !== 3) {
+            router.replace('/(main)');
+            return;
+        }
+    }, [isAuthenticated, user?.role, isLoading, segments]);
 }

@@ -21,6 +21,7 @@ public class PatchUserCommandHandler : IRequestHandler<PatchUserCommand>
     public async Task Handle(PatchUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByIdAsync(request.UserId.ToString());
+        var identical = true;
         if (user is null)
         {
             throw new NotFoundException($"User with ID {request.UserId} was not found.");
@@ -36,6 +37,7 @@ public class PatchUserCommandHandler : IRequestHandler<PatchUserCommand>
 
             user.Email = request.Email;
             user.NormalizedEmail = _userManager.NormalizeEmail(request.Email);
+            identical = false;
         }
 
         if (request.Username is not null && !string.Equals(user.UserName, request.Username, StringComparison.OrdinalIgnoreCase))
@@ -47,25 +49,31 @@ public class PatchUserCommandHandler : IRequestHandler<PatchUserCommand>
             }
             user.UserName = request.Username;
             user.NormalizedUserName = _userManager.NormalizeName(request.Username);
+            identical = false;
         }
 
-        if (request.FirstName is not null)
+        if (request.FirstName is not null && !string.Equals(user.FirstName, request.FirstName))
         {
             user.FirstName = request.FirstName;
+            identical = false;
         }
 
-        if (request.LastName is not null)
+        if (request.LastName is not null && !string.Equals(user.LastName, request.LastName))
         {
             user.LastName = request.LastName;
+            identical = false;
         }
 
-        var result = await _userManager.UpdateAsync(user);
-
-        if (!result.Succeeded)
+        if (!identical)
         {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError($"Patch failed: {errors}");
-            throw new AppException("Server error");
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                _logger.LogError($"Patch failed: {errors}");
+                throw new AppException("Server error");
+            }
         }
     }
 }

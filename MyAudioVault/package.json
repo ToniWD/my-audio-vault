@@ -3,7 +3,11 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@expo-google-fonts/fira-code": "^0.4.1",
     "@expo/ui": "~57.0.18",
+    "@react-native-vector-icons/common": "^13.0.3",
+    "@react-native-vector-icons/feather": "^13.1.4",
+    "@react-native-vector-icons/ionicons": "^13.1.4",
     "expo": "~57.0.22",
     "expo-constants": "~57.0.18",
     "expo-device": "~57.0.2",

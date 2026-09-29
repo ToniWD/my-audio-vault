@@ -4,7 +4,6 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet,
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
@@ -12,6 +11,8 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
+import { Colors } from '@/constants/colors';
+import { globalStyles } from '@/constants/globalStyles';
 
 export default function LoginScreen() {
     const { login } = useAuth();
@@ -33,57 +34,58 @@ export default function LoginScreen() {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={globalStyles.screen}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={globalStyles.scrollContent}
                 keyboardShouldPersistTaps="handled"
             >
-                <View style={styles.form}>
-                    <Text style={styles.title}>Welcome Back</Text>
-                    <Text style={styles.subtitle}>Sign in to continue</Text>
+                <View style={globalStyles.formGroup}>
+                    <Text style={globalStyles.title}>Welcome Back</Text>
+                    <Text style={globalStyles.subtitle}>Sign in to continue</Text>
 
-                    <Text style={styles.label}>Email</Text>
+                    <Text style={globalStyles.label}>Email</Text>
                     <TextInput
-                        style={styles.input}
+                        style={globalStyles.input}
                         value={email}
                         onChangeText={setEmail}
                         placeholder="you@example.com"
-                        placeholderTextColor="#6b7280"
+                        placeholderTextColor={Colors.mainTheme.textSecondary}
                         autoCapitalize="none"
                         keyboardType="email-address"
                         autoComplete="email"
+                    // selectionColor={Colors.mainTheme.borderActive}
                     />
 
-                    <Text style={styles.label}>Password</Text>
+                    <Text style={globalStyles.label}>Password</Text>
                     <TextInput
-                        style={styles.input}
+                        style={globalStyles.input}
                         value={password}
                         onChangeText={setPassword}
-                        placeholder="••••••••"
-                        placeholderTextColor="#6b7280"
+                        placeholder="*********"
+                        placeholderTextColor={Colors.mainTheme.textSecondary}
                         secureTextEntry
                         autoComplete="password"
                     />
 
                     <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
+                        style={[globalStyles.button, loading && globalStyles.buttonDisabled]}
                         onPress={handleLogin}
                         disabled={loading}
                     >
                         {loading ? (
-                            <ActivityIndicator color="#fff" />
+                            <ActivityIndicator color={Colors.mainTheme.borderActive} />
                         ) : (
-                            <Text style={styles.buttonText}>Log In</Text>
+                            <Text style={globalStyles.buttonText}>Log In</Text>
                         )}
                     </TouchableOpacity>
 
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>Don't have an account? </Text>
+                    <View style={globalStyles.footer}>
+                        <Text style={globalStyles.caption}>Don't have an account? </Text>
                         <Link href="/(auth)/signup" asChild>
                             <TouchableOpacity>
-                                <Text style={styles.link}>Sign Up</Text>
+                                <Text style={globalStyles.link}>Sign Up</Text>
                             </TouchableOpacity>
                         </Link>
                     </View>
@@ -92,73 +94,3 @@ export default function LoginScreen() {
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#0f0f0f',
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        padding: 24,
-    },
-    form: {
-        gap: 8,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#ffffff',
-        marginBottom: 4,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#9ca3af',
-        marginBottom: 24,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#d1d5db',
-        marginTop: 8,
-    },
-    input: {
-        backgroundColor: '#1f1f1f',
-        borderWidth: 1,
-        borderColor: '#374151',
-        borderRadius: 12,
-        padding: 14,
-        fontSize: 16,
-        color: '#ffffff',
-    },
-    button: {
-        backgroundColor: '#6366f1',
-        borderRadius: 12,
-        padding: 16,
-        alignItems: 'center',
-        marginTop: 16,
-    },
-    buttonDisabled: {
-        opacity: 0.6,
-    },
-    buttonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 24,
-    },
-    footerText: {
-        color: '#9ca3af',
-        fontSize: 14,
-    },
-    link: {
-        color: '#6366f1',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-});

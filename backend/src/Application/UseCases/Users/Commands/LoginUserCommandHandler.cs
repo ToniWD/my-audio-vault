@@ -24,7 +24,6 @@ public class LoginUserHandler : IRequestHandler<LoginRequest, AuthenticationResp
 
     public async Task<AuthenticationResponse> Handle(LoginRequest request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation(request.ToString());
         var user = await _userManager.FindByEmailAsync(request.Email);
 
         if (user is null)

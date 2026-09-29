@@ -33,7 +33,10 @@
           "imageWidth": 76
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-vector-icons/ionicons",
+      "@react-native-vector-icons/feather",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

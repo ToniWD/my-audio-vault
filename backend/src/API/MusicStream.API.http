@@ -1,6 +1,0 @@
-@MusicStream.API_HostAddress = http://localhost:5204
-
-GET {{MusicStream.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

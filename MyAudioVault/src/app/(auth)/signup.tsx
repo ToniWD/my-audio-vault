@@ -4,7 +4,6 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    StyleSheet,
     ActivityIndicator,
     KeyboardAvoidingView,
     Platform,
@@ -12,6 +11,8 @@ import {
 } from 'react-native';
 import { Link } from 'expo-router';
 import { useAuth } from '../../hooks/useAuth';
+import { globalStyles } from '@/constants/globalStyles';
+import { Colors } from '@/constants/colors';
 
 export default function SignupScreen() {
     const { register } = useAuth();
@@ -48,101 +49,101 @@ export default function SignupScreen() {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={globalStyles.screen}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView
-                contentContainerStyle={styles.scrollContent}
+                contentContainerStyle={globalStyles.scrollContent}
                 keyboardShouldPersistTaps="handled"
             >
-                <View style={styles.form}>
-                    <Text style={styles.title}>Create Account</Text>
-                    <Text style={styles.subtitle}>Sign up to get started</Text>
+                <View style={globalStyles.formGroup}>
+                    <Text style={globalStyles.title}>Create Account</Text>
+                    <Text style={globalStyles.subtitle}>Sign up to get started</Text>
 
-                    <Text style={styles.label}>Username</Text>
+                    <Text style={globalStyles.label}>Username</Text>
                     <TextInput
-                        style={styles.input}
+                        style={globalStyles.input}
                         value={username}
                         onChangeText={setUsername}
                         placeholder="johndoe"
-                        placeholderTextColor="#6b7280"
+                        placeholderTextColor={Colors.mainTheme.textSecondary}
                         autoCapitalize="none"
                     />
 
-                    <View style={styles.row}>
-                        <View style={styles.halfField}>
-                            <Text style={styles.label}>First Name</Text>
+                    <View style={globalStyles.row}>
+                        <View style={globalStyles.flex1}>
+                            <Text style={globalStyles.label}>First Name</Text>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 value={firstName}
                                 onChangeText={setFirstName}
                                 placeholder="John"
-                                placeholderTextColor="#6b7280"
+                                placeholderTextColor={Colors.mainTheme.textSecondary}
                                 autoCapitalize="words"
                             />
                         </View>
-                        <View style={styles.halfField}>
-                            <Text style={styles.label}>Last Name</Text>
+                        <View style={globalStyles.flex1}>
+                            <Text style={globalStyles.label}>Last Name</Text>
                             <TextInput
-                                style={styles.input}
+                                style={globalStyles.input}
                                 value={lastName}
                                 onChangeText={setLastName}
                                 placeholder="Doe"
-                                placeholderTextColor="#6b7280"
+                                placeholderTextColor={Colors.mainTheme.textSecondary}
                                 autoCapitalize="words"
                             />
                         </View>
                     </View>
 
-                    <Text style={styles.label}>Email</Text>
+                    <Text style={globalStyles.label}>Email</Text>
                     <TextInput
-                        style={styles.input}
+                        style={globalStyles.input}
                         value={email}
                         onChangeText={setEmail}
                         placeholder="you@example.com"
-                        placeholderTextColor="#6b7280"
+                        placeholderTextColor={Colors.mainTheme.textSecondary}
                         autoCapitalize="none"
                         keyboardType="email-address"
                         autoComplete="email"
                     />
 
-                    <Text style={styles.label}>Password</Text>
+                    <Text style={globalStyles.label}>Password</Text>
                     <TextInput
-                        style={styles.input}
+                        style={globalStyles.input}
                         value={password}
                         onChangeText={setPassword}
                         placeholder="••••••••"
-                        placeholderTextColor="#6b7280"
+                        placeholderTextColor={Colors.mainTheme.textSecondary}
                         secureTextEntry
                     />
 
-                    <Text style={styles.label}>Confirm Password</Text>
+                    <Text style={globalStyles.label}>Confirm Password</Text>
                     <TextInput
-                        style={styles.input}
+                        style={globalStyles.input}
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         placeholder="••••••••"
-                        placeholderTextColor="#6b7280"
+                        placeholderTextColor={Colors.mainTheme.textSecondary}
                         secureTextEntry
                     />
 
                     <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
+                        style={[globalStyles.button, loading && globalStyles.buttonDisabled]}
                         onPress={handleSignup}
                         disabled={loading}
                     >
                         {loading ? (
-                            <ActivityIndicator color="#fff" />
+                            <ActivityIndicator color={Colors.mainTheme.borderActive} />
                         ) : (
-                            <Text style={styles.buttonText}>Sign Up</Text>
+                            <Text style={globalStyles.buttonText}>Sign Up</Text>
                         )}
                     </TouchableOpacity>
 
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>Already have an account? </Text>
+                    <View style={globalStyles.footer}>
+                        <Text style={globalStyles.caption}>Already have an account? </Text>
                         <Link href="/(auth)/login" asChild>
                             <TouchableOpacity>
-                                <Text style={styles.link}>Log In</Text>
+                                <Text style={globalStyles.link}>Log In</Text>
                             </TouchableOpacity>
                         </Link>
                     </View>
@@ -151,81 +152,3 @@ export default function SignupScreen() {
         </KeyboardAvoidingView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#0f0f0f',
-    },
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        padding: 24,
-    },
-    form: {
-        gap: 4,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        color: '#ffffff',
-        marginBottom: 4,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#9ca3af',
-        marginBottom: 16,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: '#d1d5db',
-        marginTop: 8,
-    },
-    input: {
-        backgroundColor: '#1f1f1f',
-        borderWidth: 1,
-        borderColor: '#374151',
-        borderRadius: 12,
-        padding: 14,
-        fontSize: 16,
-        color: '#ffffff',
-    },
-    row: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    halfField: {
-        flex: 1,
-    },
-    button: {
-        backgroundColor: '#6366f1',
-        borderRadius: 12,
-        padding: 16,
-        alignItems: 'center',
-        marginTop: 16,
-    },
-    buttonDisabled: {
-        opacity: 0.6,
-    },
-    buttonText: {
-        color: '#ffffff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 20,
-        marginBottom: 16,
-    },
-    footerText: {
-        color: '#9ca3af',
-        fontSize: 14,
-    },
-    link: {
-        color: '#6366f1',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-});

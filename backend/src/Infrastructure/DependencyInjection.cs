@@ -98,10 +98,14 @@ public static class DependencyInjection
     private static void AddRepositoriesServices(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISongRepository, SongRepository>();
     }
 
     private static void AddAWSServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.Configure<S3Settings>(
+            configuration.GetSection("AWS"));
+
         services.AddSingleton<IAmazonS3>(sp =>
         {
             var s3Settings = configuration.GetSection("AWS").Get<S3Settings>();
@@ -128,7 +132,8 @@ public static class DependencyInjection
 
         var logger = loggerFactory.CreateLogger(nameof(DependencyInjection));
 
-        var bucketName = app.Configuration["AWS:BucketName"] ?? "vault";
+        var storageOptions = scope.ServiceProvider.GetRequiredService<IOptions<S3Settings>>().Value;
+        var bucketName = storageOptions.BucketName;
         logger.LogInformation($"Check if the \"{bucketName}\" bucket exists");
 
         try

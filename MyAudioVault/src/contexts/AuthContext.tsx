@@ -1,28 +1,23 @@
-import { LoginRequest, postApiAuthLogin, postApiAuthRegister, RegisterRequest } from '@/api';
+import { getApiUsersMe, LoginRequest, postApiAuthLogin, postApiAuthRegister, RegisterRequest, UserDto } from '@/api';
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { tokenStorage } from '../services/storage/TokenStorageService'
 import { extractUser } from '@/utils/JwtUtils';
 import { tokenManager } from '@/services/TokenManager';
 
-export interface AuthUser {
-    email: string;
-    name: string;
-    role: string;
-}
-
 export interface AuthContextType {
-    user: AuthUser | null;
+    user: UserDto | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     login: (data: LoginRequest) => Promise<void>;
     register: (data: RegisterRequest) => Promise<void>;
     logout: () => Promise<void>;
+    fetchUser: () => Promise<UserDto | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<AuthUser | null>(null);
+    const [user, setUser] = useState<UserDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -37,9 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const token = await tokenManager.getValidAccessToken();
 
                 if (token) {
-                    const authUser = extractUser(token);
-                    if (authUser) {
-                        setUser(authUser);
+                    const result = await fetchUser();
+                    console.log(result)
+                    if (result) {
                         return;
                     }
                 }
@@ -65,10 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             body: data
         });
         if (result.data) {
-            const authUser = extractUser(result.data.accessToken);
             await tokenStorage.storeAccessToken(result.data.accessToken);
             await tokenStorage.storeRefreshToken(result.data.refreshToken);
-            setUser(authUser);
+            await fetchUser()
         } else {
             console.error(result.error);
         }
@@ -88,6 +82,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         tokenManager.logout();
     }, []);
 
+    const fetchUser = useCallback(async () => {
+        const result = await getApiUsersMe();
+        if (result.data) {
+            await setUser(result.data);
+            return result.data
+        } else {
+            console.error(result.error);
+            return null
+        }
+    }, []);
+
     return (
         <AuthContext.Provider
             value={{
@@ -97,6 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 login,
                 register,
                 logout,
+                fetchUser
             }}
         >
             {children}

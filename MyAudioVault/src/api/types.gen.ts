@@ -10,6 +10,15 @@ export type AuthenticationResponse = {
     refreshToken: string;
 };
 
+export type ChangePasswordRequest = {
+    currentPassword: string;
+    newPassword: string;
+};
+
+export type DeleteAccountRequest = {
+    password: string;
+};
+
 export type HealthCheck = {
     status: string;
     timeStamp: string;
@@ -18,6 +27,13 @@ export type HealthCheck = {
 export type LoginRequest = {
     email: string;
     password: string;
+};
+
+export type PatchUserRequest = {
+    username?: null | string;
+    firstName?: null | string;
+    lastName?: null | string;
+    email?: null | string;
 };
 
 export type ProblemDetails = {
@@ -43,6 +59,17 @@ export type RegisterRequest = {
 export type RegisterResponse = {
     userId: string;
 };
+
+export type UserDto = {
+    id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: UserRole;
+};
+
+export type UserRole = number;
 
 export type PostApiAuthRegisterData = {
     body: RegisterRequest;
@@ -134,3 +161,224 @@ export type GetApiAuthHealthResponses = {
 };
 
 export type GetApiAuthHealthResponse = GetApiAuthHealthResponses[keyof GetApiAuthHealthResponses];
+
+export type DeleteApiUsersMeData = {
+    body: DeleteAccountRequest;
+    path?: never;
+    query?: never;
+    url: '/api/users/me';
+};
+
+export type DeleteApiUsersMeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type DeleteApiUsersMeError = DeleteApiUsersMeErrors[keyof DeleteApiUsersMeErrors];
+
+export type DeleteApiUsersMeResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteApiUsersMeResponse = DeleteApiUsersMeResponses[keyof DeleteApiUsersMeResponses];
+
+export type GetApiUsersMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/users/me';
+};
+
+export type GetApiUsersMeErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type GetApiUsersMeError = GetApiUsersMeErrors[keyof GetApiUsersMeErrors];
+
+export type GetApiUsersMeResponses = {
+    /**
+     * OK
+     */
+    200: UserDto;
+};
+
+export type GetApiUsersMeResponse = GetApiUsersMeResponses[keyof GetApiUsersMeResponses];
+
+export type PatchApiUsersMeData = {
+    body: PatchUserRequest;
+    path?: never;
+    query?: never;
+    url: '/api/users/me';
+};
+
+export type PatchApiUsersMeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type PatchApiUsersMeError = PatchApiUsersMeErrors[keyof PatchApiUsersMeErrors];
+
+export type PatchApiUsersMeResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type PatchApiUsersMeResponse = PatchApiUsersMeResponses[keyof PatchApiUsersMeResponses];
+
+export type DeleteApiUsersByUserIdData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/users/{userId}';
+};
+
+export type DeleteApiUsersByUserIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type DeleteApiUsersByUserIdError = DeleteApiUsersByUserIdErrors[keyof DeleteApiUsersByUserIdErrors];
+
+export type DeleteApiUsersByUserIdResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteApiUsersByUserIdResponse = DeleteApiUsersByUserIdResponses[keyof DeleteApiUsersByUserIdResponses];
+
+export type GetApiUsersByUserIdData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/users/{userId}';
+};
+
+export type GetApiUsersByUserIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiUsersByUserIdError = GetApiUsersByUserIdErrors[keyof GetApiUsersByUserIdErrors];
+
+export type GetApiUsersByUserIdResponses = {
+    /**
+     * OK
+     */
+    200: UserDto;
+};
+
+export type GetApiUsersByUserIdResponse = GetApiUsersByUserIdResponses[keyof GetApiUsersByUserIdResponses];
+
+export type PatchApiUsersByUserIdData = {
+    body: PatchUserRequest;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/api/users/{userId}';
+};
+
+export type PatchApiUsersByUserIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Forbidden
+     */
+    403: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PatchApiUsersByUserIdError = PatchApiUsersByUserIdErrors[keyof PatchApiUsersByUserIdErrors];
+
+export type PatchApiUsersByUserIdResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type PatchApiUsersByUserIdResponse = PatchApiUsersByUserIdResponses[keyof PatchApiUsersByUserIdResponses];
+
+export type PutApiUsersMePasswordData = {
+    body: ChangePasswordRequest;
+    path?: never;
+    query?: never;
+    url: '/api/users/me/password';
+};
+
+export type PutApiUsersMePasswordErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type PutApiUsersMePasswordError = PutApiUsersMePasswordErrors[keyof PutApiUsersMePasswordErrors];
+
+export type PutApiUsersMePasswordResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type PutApiUsersMePasswordResponse = PutApiUsersMePasswordResponses[keyof PutApiUsersMePasswordResponses];

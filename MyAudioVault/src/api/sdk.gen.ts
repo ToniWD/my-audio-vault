@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetApiAuthHealthData, GetApiAuthHealthResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthRefreshData, PostApiAuthRefreshErrors, PostApiAuthRefreshResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses } from './types.gen';
+import type { DeleteApiUsersByUserIdData, DeleteApiUsersByUserIdErrors, DeleteApiUsersByUserIdResponses, DeleteApiUsersMeData, DeleteApiUsersMeErrors, DeleteApiUsersMeResponses, GetApiAuthHealthData, GetApiAuthHealthResponses, GetApiUsersByUserIdData, GetApiUsersByUserIdErrors, GetApiUsersByUserIdResponses, GetApiUsersMeData, GetApiUsersMeErrors, GetApiUsersMeResponses, PatchApiUsersByUserIdData, PatchApiUsersByUserIdErrors, PatchApiUsersByUserIdResponses, PatchApiUsersMeData, PatchApiUsersMeErrors, PatchApiUsersMeResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthRefreshData, PostApiAuthRefreshErrors, PostApiAuthRefreshResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PutApiUsersMePasswordData, PutApiUsersMePasswordErrors, PutApiUsersMePasswordResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -46,3 +46,45 @@ export const postApiAuthRefresh = <ThrowOnError extends boolean = false>(options
 });
 
 export const getApiAuthHealth = <ThrowOnError extends boolean = false>(options?: Options<GetApiAuthHealthData, ThrowOnError>): RequestResult<GetApiAuthHealthResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetApiAuthHealthResponses, unknown, ThrowOnError>({ url: '/api/auth/health', ...options });
+
+export const deleteApiUsersMe = <ThrowOnError extends boolean = false>(options: Options<DeleteApiUsersMeData, ThrowOnError>): RequestResult<DeleteApiUsersMeResponses, DeleteApiUsersMeErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiUsersMeResponses, DeleteApiUsersMeErrors, ThrowOnError>({
+    url: '/api/users/me',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getApiUsersMe = <ThrowOnError extends boolean = false>(options?: Options<GetApiUsersMeData, ThrowOnError>): RequestResult<GetApiUsersMeResponses, GetApiUsersMeErrors, ThrowOnError> => (options?.client ?? client).get<GetApiUsersMeResponses, GetApiUsersMeErrors, ThrowOnError>({ url: '/api/users/me', ...options });
+
+export const patchApiUsersMe = <ThrowOnError extends boolean = false>(options: Options<PatchApiUsersMeData, ThrowOnError>): RequestResult<PatchApiUsersMeResponses, PatchApiUsersMeErrors, ThrowOnError> => (options.client ?? client).patch<PatchApiUsersMeResponses, PatchApiUsersMeErrors, ThrowOnError>({
+    url: '/api/users/me',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const deleteApiUsersByUserId = <ThrowOnError extends boolean = false>(options: Options<DeleteApiUsersByUserIdData, ThrowOnError>): RequestResult<DeleteApiUsersByUserIdResponses, DeleteApiUsersByUserIdErrors, ThrowOnError> => (options.client ?? client).delete<DeleteApiUsersByUserIdResponses, DeleteApiUsersByUserIdErrors, ThrowOnError>({ url: '/api/users/{userId}', ...options });
+
+export const getApiUsersByUserId = <ThrowOnError extends boolean = false>(options: Options<GetApiUsersByUserIdData, ThrowOnError>): RequestResult<GetApiUsersByUserIdResponses, GetApiUsersByUserIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiUsersByUserIdResponses, GetApiUsersByUserIdErrors, ThrowOnError>({ url: '/api/users/{userId}', ...options });
+
+export const patchApiUsersByUserId = <ThrowOnError extends boolean = false>(options: Options<PatchApiUsersByUserIdData, ThrowOnError>): RequestResult<PatchApiUsersByUserIdResponses, PatchApiUsersByUserIdErrors, ThrowOnError> => (options.client ?? client).patch<PatchApiUsersByUserIdResponses, PatchApiUsersByUserIdErrors, ThrowOnError>({
+    url: '/api/users/{userId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const putApiUsersMePassword = <ThrowOnError extends boolean = false>(options: Options<PutApiUsersMePasswordData, ThrowOnError>): RequestResult<PutApiUsersMePasswordResponses, PutApiUsersMePasswordErrors, ThrowOnError> => (options.client ?? client).put<PutApiUsersMePasswordResponses, PutApiUsersMePasswordErrors, ThrowOnError>({
+    url: '/api/users/me/password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});

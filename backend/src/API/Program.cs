@@ -16,6 +16,11 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 20 * 1024 * 1024; // 20 MB
+});
+
 builder.Services.AddControllers();
 
 // Add services to the container.
