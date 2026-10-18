@@ -3,3 +3,5 @@
 docs/.obsidian/workspace.json
 docs/.obsidian/themes/
 AGENTS.md
+scripts/*
+data/*

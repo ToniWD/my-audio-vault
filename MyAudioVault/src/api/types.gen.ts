@@ -4,6 +4,14 @@ export type ClientOptions = {
     baseUrl: 'http://localhost:5204/' | (string & {});
 };
 
+export type AudioFileSummaryDto = {
+    id: string;
+    format: string;
+    quality: string;
+    bitrateKbps: number | string;
+    fileSizeBytes: number | string;
+};
+
 export type AuthenticationResponse = {
     accessToken: string;
     accessTokenExpirationTime: string;
@@ -24,9 +32,21 @@ export type HealthCheck = {
     timeStamp: string;
 };
 
+export type IFormFile = Blob | File;
+
 export type LoginRequest = {
     email: string;
     password: string;
+};
+
+export type PagedResponseOfSongDetailsDto = {
+    data?: Array<SongDetailsDto>;
+    pageNumber?: number | string;
+    pageSize?: number | string;
+    totalPages?: number | string;
+    totalRecords?: number | string;
+    hasNextPage?: boolean;
+    hasPreviousPage?: boolean;
 };
 
 export type PatchUserRequest = {
@@ -60,6 +80,17 @@ export type RegisterResponse = {
     userId: string;
 };
 
+export type SongDetailsDto = {
+    id: string;
+    title: string;
+    coverImageUrl: string;
+    genre: string;
+    releaseDate: string;
+    isExplicit: boolean;
+    durationSeconds: number | string;
+    availableQualities: Array<AudioFileSummaryDto>;
+};
+
 export type UserDto = {
     id: string;
     username: string;
@@ -70,6 +101,162 @@ export type UserDto = {
 };
 
 export type UserRole = number;
+
+export type GetApiSongsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        PageNumber?: number | string;
+        PageSize?: number | string;
+        SortBy?: string;
+        Search?: string;
+    };
+    url: '/api/songs';
+};
+
+export type GetApiSongsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type GetApiSongsError = GetApiSongsErrors[keyof GetApiSongsErrors];
+
+export type GetApiSongsResponses = {
+    /**
+     * OK
+     */
+    200: PagedResponseOfSongDetailsDto;
+};
+
+export type GetApiSongsResponse = GetApiSongsResponses[keyof GetApiSongsResponses];
+
+export type PostApiSongsUploadData = {
+    body: {
+        file?: IFormFile;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/songs/upload';
+};
+
+export type PostApiSongsUploadErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Payload Too Large
+     */
+    413: ProblemDetails;
+};
+
+export type PostApiSongsUploadError = PostApiSongsUploadErrors[keyof PostApiSongsUploadErrors];
+
+export type PostApiSongsUploadResponses = {
+    /**
+     * OK
+     */
+    200: string;
+};
+
+export type PostApiSongsUploadResponse = PostApiSongsUploadResponses[keyof PostApiSongsUploadResponses];
+
+export type GetApiSongsStreamByTokenData = {
+    body?: never;
+    path: {
+        token: string;
+    };
+    query?: never;
+    url: '/api/songs/stream/{token}';
+};
+
+export type GetApiSongsStreamByTokenErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiSongsStreamByTokenError = GetApiSongsStreamByTokenErrors[keyof GetApiSongsStreamByTokenErrors];
+
+export type GetApiSongsStreamByTokenResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+    /**
+     * Partial Content
+     */
+    206: unknown;
+};
+
+export type PostApiSongsTokenBySongIdData = {
+    body?: never;
+    path: {
+        songId: string;
+    };
+    query?: never;
+    url: '/api/songs/token/{songId}';
+};
+
+export type PostApiSongsTokenBySongIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+};
+
+export type PostApiSongsTokenBySongIdError = PostApiSongsTokenBySongIdErrors[keyof PostApiSongsTokenBySongIdErrors];
+
+export type PostApiSongsTokenBySongIdResponses = {
+    /**
+     * OK
+     */
+    200: string;
+};
+
+export type PostApiSongsTokenBySongIdResponse = PostApiSongsTokenBySongIdResponses[keyof PostApiSongsTokenBySongIdResponses];
+
+export type GetApiSongsBySongIdData = {
+    body?: never;
+    path: {
+        songId: string;
+    };
+    query?: never;
+    url: '/api/songs/{songId}';
+};
+
+export type GetApiSongsBySongIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiSongsBySongIdError = GetApiSongsBySongIdErrors[keyof GetApiSongsBySongIdErrors];
+
+export type GetApiSongsBySongIdResponses = {
+    /**
+     * OK
+     */
+    200: SongDetailsDto;
+};
+
+export type GetApiSongsBySongIdResponse = GetApiSongsBySongIdResponses[keyof GetApiSongsBySongIdResponses];
 
 export type PostApiAuthRegisterData = {
     body: RegisterRequest;

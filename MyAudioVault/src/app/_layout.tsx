@@ -1,6 +1,6 @@
 import { Stack, SplashScreen } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
-import { AuthProvider, useAuthContext } from '../contexts/AuthContext';
+import { AuthProvider, useAuthContext } from '../contexts/authContext';
 import { useProtectedRoute } from '../hooks/useProtectedRoute';
 import { useFonts, FiraCode_400Regular, FiraCode_700Bold } from '@expo-google-fonts/fira-code';
 import { useEffect } from 'react';

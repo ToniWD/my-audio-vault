@@ -1,7 +1,6 @@
 import { getApiUsersMe, LoginRequest, postApiAuthLogin, postApiAuthRegister, RegisterRequest, UserDto } from '@/api';
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { tokenStorage } from '../services/storage/TokenStorageService'
-import { extractUser } from '@/utils/JwtUtils';
 import { tokenManager } from '@/services/TokenManager';
 
 export interface AuthContextType {

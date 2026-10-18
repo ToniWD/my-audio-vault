@@ -1,5 +1,4 @@
 using MusicStream.API.Extensions;
-using MusicStream.Application.Configuration;
 using MusicStream.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);

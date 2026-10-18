@@ -1,4 +1,3 @@
-
 using MediatR;
 using MusicStream.Application.DTOs;
 using MusicStream.Application.Interfaces;
