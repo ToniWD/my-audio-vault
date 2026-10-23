@@ -1,15 +1,24 @@
-import { getApiSongsBySongId, postApiSongsTokenBySongId, SongDetailsDto } from "@/api";
+import { getApiSongs, getApiSongsBySongId, postApiSongsTokenBySongId, SongDetailsDto } from "@/api";
+import { useMusicStore } from "@/hooks/useMusicStore";
 import { AudioPlayer, setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 
 export interface AudioPlayerContextType {
     player: AudioPlayer;
-    songDetails: null | SongDetailsDto;
-    setSongById: (songId: string | null) => Promise<void>;
-    setSongDetails: (songDetails: SongDetailsDto) => Promise<void>;
+    songDetails: null | SongDetailsDto | undefined;
+    playlist: SongDetailsDto[];
+    autoPlayNextTrack: boolean
+    // setSongById: (songId: string | null) => Promise<void>;
+    // setSongDetails: (songDetails: SongDetailsDto) => Promise<void>;
+    setPlaylist: (songsList: SongDetailsDto[]) => void;
     stop: () => Promise<void>;
     play: () => Promise<void>;
+    playFromCurrentPlaylist: (index: number) => Promise<void>;
+    next: () => Promise<void>;
+    previous: () => Promise<void>;
+    generatePlaylist: () => Promise<void>;
+    setAutoPlayNextTrack: (enable: boolean) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
@@ -17,12 +26,23 @@ const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(und
 const API_BASE_URL = "http://localhost:5204";
 
 export function AudioPlayerProvider({ children }: { children: React.ReactNode }) {
-    const [currentSongId, setCurrentSongId] = useState<string | null>(null);
 
-    const currentSongIdRef = useRef<string | null>(null);
-    currentSongIdRef.current = currentSongId;
+    // ------------------------------------------------------------ state
+    const [autoPlayNextTrack, setAutoPlayNextTrack] = useState<boolean>(true);
+    const currentSongId = useMusicStore((state) => state.currentSongId);
+    const currentSongIndex = useMusicStore((state) => state.currentSongIndex);
+    // setCurrentSongById it will set the index at the first song with the given id
+    // from the current playlist
+    const setCurrentSongById = useMusicStore((state) => state.setCurrentSongById);
+    const setCurrentSongByIndex = useMusicStore((state) => state.setCurrentSongByIndex);
 
-    const [songDetails, setSongDetails] = useState<null | SongDetailsDto>(null);
+    const playlist = useMusicStore((state) => state.playlist);
+
+    const setPlaylist = useMusicStore((state) => state.setPlaylist);
+    const getNextSongIndex = useMusicStore((state) => state.getNextSongIndex);
+    const getPrevSongIndex = useMusicStore((state) => state.getPreviousSongIndex);
+
+    const songDetails = useMusicStore((state) => state.currentSongIndex !== null ? state.playlist.at(state.currentSongIndex) : null);
 
     const player = useAudioPlayer({
         uri: '',
@@ -32,6 +52,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         preferredForwardBufferDuration: 20
     });
 
+    // ------------------------------------------------------------ effects
     useEffect(() => {
         setAudioModeAsync({
             playsInSilentMode: true,
@@ -42,6 +63,21 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         });
     }, []);
 
+    useEffect(() => {
+        if (!autoPlayNextTrack) return;
+        const subscription = player.addListener("playbackStatusUpdate", async (status) => {
+            if (status.didJustFinish) {
+                console.log("Song finished, moving to next track...");
+                await handleNext();
+            }
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, [player, autoPlayNextTrack]);
+
+    // ------------------------------------------------------------- utils
     const fetchStreamToken = async (songId: string): Promise<string | null> => {
         const result = await postApiSongsTokenBySongId({
             path: {
@@ -70,23 +106,6 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         player.play();
     };
 
-    useEffect(() => {
-        const subscription = player.addListener("playbackStatusUpdate", async (status) => {
-
-            if (status.error) {
-                console.warn("Player error, trying to refresh token...", status.error);
-
-                if (currentSongIdRef.current) {
-                    await loadAndPlaySong(currentSongIdRef.current);
-                }
-            }
-        });
-
-        return () => {
-            subscription.remove();
-        };
-    }, [player]);
-
     const fetchSongDetails = useCallback(async (songId: string): Promise<SongDetailsDto | null> => {
         const result = await getApiSongsBySongId({
             path: {
@@ -103,33 +122,34 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         }
     }, []);
 
-    const handleSetSongId = useCallback(async (songId: string | null) => {
-        if (!songId || songId.trim() === "") {
-            await handleStop();
-            setCurrentSongId(null);
-            setSongDetails(null);
-        } else {
-            await fetchSongDetails(songId).then(details => {
-                if (details) {
-                    setCurrentSongId(details.id);
-                    setSongDetails(details);
-                }
-            });
-            await loadAndPlaySong(songId);
-        }
-    }, []);
+    // ---------------------------------------------------------- handlers
+    // const handleSetSongId = useCallback(async (songId: string | null) => {
+    //     if (!songId || songId.trim() === "") {
+    //         await handleStop();
+    //         setCurrentSongById(null);
+    //         setSongDetails(null);
+    //     } else {
+    //         await fetchSongDetails(songId).then(details => {
+    //             if (details) {
+    //                 setCurrentSongById(details.id);
+    //                 setSongDetails(details);
+    //             }
+    //         });
+    //         await loadAndPlaySong(songId);
+    //     }
+    // }, []);
 
-    const handleSetSongDetails = useCallback(async (songDetails: SongDetailsDto | null) => {
-        if (!songDetails) {
-            await handleStop();
-            setSongDetails(null);
-            setCurrentSongId(null);
-        } else {
-            setCurrentSongId(songDetails.id);
-            setSongDetails(songDetails);
-            await loadAndPlaySong(songDetails.id);
-        }
-    }, []);
+    // const handleSetSongDetails = useCallback(async (songDetails: SongDetailsDto | null) => {
+    //     if (!songDetails) {
+    //         await handleStop();
+    //         setSongDetails(null);
+    //         setCurrentSongById(null);
+    //     } else {
+    //         setCurrentSongById(songDetails.id);
+    //         setSongDetails(songDetails);
+    //         await loadAndPlaySong(songDetails.id);
+    //     }
+    // }, []);
 
     const handlePlay = useCallback(async () => {
         player.setActiveForLockScreen(true, {
@@ -146,15 +166,113 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         player.setActiveForLockScreen(false);
     }, [player]);
 
+    const handleNext = useCallback(async () => {
+        const nextSong = getNextSongIndex();
+        if (nextSong) {
+            setCurrentSongByIndex(nextSong);
+            const freshCurrentSongId = useMusicStore.getState().currentSongId;
+
+            if (freshCurrentSongId) {
+                await loadAndPlaySong(freshCurrentSongId);
+            }
+        }
+    }, [player]);
+
+    const handlePrevious = useCallback(async () => {
+        if (player.currentTime > 3) {
+            player.seekTo(0);
+            return;
+        }
+
+        const prevSong = getPrevSongIndex();
+
+        if (prevSong !== null) {
+            setCurrentSongByIndex(prevSong);
+            const freshCurrentSongId = useMusicStore.getState().currentSongId;
+
+            if (freshCurrentSongId) {
+                await loadAndPlaySong(freshCurrentSongId);
+            }
+        }
+        else {
+            player.seekTo(0);
+        }
+    }, [player]);
+
+    const handleGeneratePlaylist = useCallback(async () => {
+        const result = await getApiSongs({
+            query: {
+                PageNumber: 0,
+                PageSize: 20,
+                SortBy: undefined,
+                Search: undefined
+            }
+        });
+
+        if (result.error) {
+            console.error('Error fetching songs:', result.error);
+            return;
+        }
+
+        if (result.data?.data && result.data.data.length > 0) {
+            setPlaylist(result.data?.data);
+            const freshCurrentSongId = useMusicStore.getState().currentSongId;
+
+            if (freshCurrentSongId) {
+                await loadAndPlaySong(freshCurrentSongId);
+            }
+        }
+    }, [player]);
+
+    const handleSetPlaylist = useCallback(async (songsList: SongDetailsDto[]) => {
+        if (songsList.length === 0) {
+            handleStop();
+            setPlaylist([]);
+            return;
+        }
+
+        setPlaylist(songsList);
+        const freshCurrentSongId = useMusicStore.getState().currentSongId;
+
+        if (freshCurrentSongId) {
+            await loadAndPlaySong(freshCurrentSongId);
+        }
+    }, [player]);
+
+    const handlePlayFromCurrentPlaylist = useCallback(async (index: number) => {
+        const freshPlaylist = useMusicStore.getState().playlist;
+        if (index < 0 || index >= freshPlaylist.length) {
+            console.error('Index out of bounds for playlist');
+            return;
+        }
+
+        const freshCurrentSongIndex = useMusicStore.getState().currentSongIndex;
+        if (index != freshCurrentSongIndex) {
+            setCurrentSongByIndex(index)
+            const freshCurrentSongId = useMusicStore.getState().currentSongId;
+
+            if (freshCurrentSongId) {
+                await loadAndPlaySong(freshCurrentSongId);
+            }
+        }
+    }, [player]);
+
+    // ------------------------------------------------------------- render
     return (
         <AudioPlayerContext.Provider
             value={{
                 player: player,
+                playlist: playlist,
                 songDetails: songDetails,
-                setSongById: handleSetSongId,
-                setSongDetails: handleSetSongDetails,
+                autoPlayNextTrack: autoPlayNextTrack,
                 stop: handleStop,
                 play: handlePlay,
+                next: handleNext,
+                previous: handlePrevious,
+                generatePlaylist: handleGeneratePlaylist,
+                setPlaylist: handleSetPlaylist,
+                playFromCurrentPlaylist: handlePlayFromCurrentPlaylist,
+                setAutoPlayNextTrack: (enable) => { setAutoPlayNextTrack(enable) },
             }}
         >
             {children}

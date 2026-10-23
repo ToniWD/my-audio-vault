@@ -14,7 +14,7 @@ export const globalStyles = StyleSheet.create({
     screen: {
         flex: 1,
         backgroundColor: Colors.mainTheme.background,
-        padding: 20,
+        // padding: 20,
     },
     center: {
         alignItems: 'center',

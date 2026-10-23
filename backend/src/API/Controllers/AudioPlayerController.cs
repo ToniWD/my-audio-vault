@@ -74,7 +74,7 @@ public class AudioPlayerController : ControllerBase
             return Unauthorized(new { message = "Invalid or expired token." });
         }
 
-        await _cache.RemoveAsync(cacheKey);
+        // await _cache.RemoveAsync(cacheKey);
 
         string? rangeHeader = Request.Headers["Range"].FirstOrDefault();
 

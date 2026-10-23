@@ -4,63 +4,81 @@ import { create } from 'zustand';
 interface MusicState {
     playlist: SongDetailsDto[];
     currentSongId: string | null;
+    currentSongIndex: number | null;
     isLoading: boolean;
 
     setPlaylist: (songsList: SongDetailsDto[]) => void;
-    addToPlaylist: (song: SongDetailsDto) => void;
-    removeFromPlaylist: (songId: number | string) => void;
+    removeFromPlaylist: (songIndex: number) => void;
     setIsLoading: (loading: boolean) => void;
-    getNextSong: () => SongDetailsDto | null;
-    getPreviousSong: () => SongDetailsDto | null;
-    setCurrentSongId: (songId: string | null) => void;
+    getNextSongIndex: () => number | null;
+    getPreviousSongIndex: () => number | null;
+    setCurrentSongById: (songId: string | null) => void;
+    setCurrentSongByIndex: (index: number | null) => void;
 }
 
 export const useMusicStore = create<MusicState>((set, get) => ({
     playlist: [],
     currentSongId: null,
+    currentSongIndex: null,
     isLoading: false,
 
-    setPlaylist: (songsList: SongDetailsDto[]) => set({ playlist: songsList }),
+    setPlaylist: (songsList: SongDetailsDto[],) => set({
+        playlist: songsList,
+        currentSongIndex: songsList.length > 0 ? 0 : null,
+        currentSongId: songsList.length > 0 ? songsList[0].id : null
+    }),
 
     setIsLoading: (loading: boolean) => set({ isLoading: loading }),
 
-    addToPlaylist: (song: SongDetailsDto) => {
+    removeFromPlaylist: (songIndex: number) => {
         const { playlist } = get();
-        const exists = playlist.some((item) => item.id === song.id);
+        if (songIndex < 0 || songIndex >= playlist.length) {
+            console.error('Index out of bounds for playlist');
+            return;
+        }
 
-        if (!exists) {
-            set({ playlist: [...playlist, song] });
+        const newPlaylist = [...playlist];
+        newPlaylist.splice(songIndex, 1);
+        set({ playlist: newPlaylist });
+    },
+
+    getNextSongIndex: () => {
+        const { playlist, currentSongIndex } = get();
+        if (!playlist || playlist.length === 0) return null;
+        if (currentSongIndex === null) return 0;
+
+        if (currentSongIndex + 1 >= playlist.length) return null;
+
+        return currentSongIndex + 1;
+    },
+
+    getPreviousSongIndex: () => {
+        const { playlist, currentSongIndex } = get();
+        if (!playlist || playlist.length === 0) return null;
+        if (currentSongIndex === null) return 0;
+
+        if (currentSongIndex <= 0) return null;
+
+        return currentSongIndex - 1;
+    },
+
+    setCurrentSongById: (songId: string | null) => {
+        const { playlist } = get();
+        const index = playlist.findIndex((song) => song.id === songId);
+        if (index !== -1) {
+            set({ currentSongId: songId, currentSongIndex: index });
+        } else {
+            console.error('Song ID not found in playlist');
         }
     },
+    setCurrentSongByIndex: (index: number | null) => {
+        const { playlist } = get();
+        if (index !== null && (index < 0 || index >= playlist.length)) {
+            console.error('Index out of bounds for playlist');
+            return;
+        }
 
-    removeFromPlaylist: (songId: number | string) => {
-        set((state) => ({
-            playlist: state.playlist.filter((song) => song.id !== songId),
-        }));
+        const songId = index !== null ? playlist[index].id : null;
+        set({ currentSongId: songId, currentSongIndex: index });
     },
-
-    getNextSong: () => {
-        const { playlist, currentSongId } = get();
-        if (!playlist || playlist.length === 0) return null;
-        if (!currentSongId) return playlist[0];
-
-        const currentIndex = playlist.findIndex((song) => song.id === currentSongId);
-        if (currentIndex === -1 || currentIndex + 1 >= playlist.length) return null;
-
-        return playlist[currentIndex + 1];
-    },
-
-    getPreviousSong: () => {
-        const { playlist, currentSongId } = get();
-        if (!playlist || playlist.length === 0) return null;
-        if (!currentSongId) return playlist[0];
-
-        const currentIndex = playlist.findIndex((song) => song.id === currentSongId);
-        if (currentIndex <= 0) return null;
-
-        return playlist[currentIndex - 1];
-    },
-
-    setCurrentSongId: (songId: string | null) => set({ currentSongId: songId }),
-
 }));
