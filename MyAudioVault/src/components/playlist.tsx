@@ -6,6 +6,7 @@ import { useMusicStore } from '@/hooks/useMusicStore';
 import Feather from '@react-native-vector-icons/feather';
 import { FlatList, Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useAudioPlayerContext } from '@/contexts/audioPlayerContext';
+import SongCover from './songCover';
 
 const FALLBACK_ARTWORK =
     'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800';
@@ -76,12 +77,13 @@ export const Playlist: React.FC<PlaylistProps> = ({
             >
                 {/* ------------------------------------------------ artwork */}
                 <View style={styles.artworkFrame}>
-                    <Image
+                    {/* <Image
                         source={{ uri: item.coverImageUrl || FALLBACK_ARTWORK }}
                         style={styles.artwork}
                         resizeMode="cover"
                         accessibilityLabel={`${item.title} cover`}
-                    />
+                    /> */}
+                    <SongCover songId={item.id} style={styles.artwork} />
                 </View>
 
                 {/* -------------------------------------------------- details */}

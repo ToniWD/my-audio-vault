@@ -5,7 +5,10 @@
 
 # dotenv files
 .env
-appsettings.*
+# Base/container appsettings are committed; local overrides are not.
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
 
 # User-specific files
 *.rsuser

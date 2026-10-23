@@ -1,4 +1,4 @@
-import { getApiSongs, getApiSongsBySongId, postApiSongsTokenBySongId, SongDetailsDto } from "@/api";
+import { getApiSongs, getApiSongsBySongId, getApiSongsBySongIdPresignedUrl, SongDetailsDto } from "@/api";
 import { useMusicStore } from "@/hooks/useMusicStore";
 import { AudioPlayer, setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
@@ -78,8 +78,8 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     }, [player, autoPlayNextTrack]);
 
     // ------------------------------------------------------------- utils
-    const fetchStreamToken = async (songId: string): Promise<string | null> => {
-        const result = await postApiSongsTokenBySongId({
+    const fetchPresignedUrl = async (songId: string): Promise<string | null> => {
+        const result = await getApiSongsBySongIdPresignedUrl({
             path: {
                 songId: songId
             }
@@ -87,7 +87,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
 
         if (result.data) {
             console.log(result.data);
-            return result.data as unknown as string;
+            return result.data.url as unknown as string;
         }
         else {
             console.error(result.error);
@@ -97,10 +97,9 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
 
     const loadAndPlaySong = async (songId: string) => {
         console.log(`Loading and playing song with ID: ${songId}`);
-        const token = await fetchStreamToken(songId);
-        if (!token) return;
 
-        const streamUrl = `${API_BASE_URL}/api/songs/stream/${token}`;
+        var streamUrl = await fetchPresignedUrl(songId);
+        if (!streamUrl || streamUrl.length == 0) return;
 
         player.replace({ uri: streamUrl });
         player.play();
@@ -122,41 +121,12 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         }
     }, []);
 
-    // ---------------------------------------------------------- handlers
-    // const handleSetSongId = useCallback(async (songId: string | null) => {
-    //     if (!songId || songId.trim() === "") {
-    //         await handleStop();
-    //         setCurrentSongById(null);
-    //         setSongDetails(null);
-    //     } else {
-    //         await fetchSongDetails(songId).then(details => {
-    //             if (details) {
-    //                 setCurrentSongById(details.id);
-    //                 setSongDetails(details);
-    //             }
-    //         });
-    //         await loadAndPlaySong(songId);
-    //     }
-    // }, []);
-
-    // const handleSetSongDetails = useCallback(async (songDetails: SongDetailsDto | null) => {
-    //     if (!songDetails) {
-    //         await handleStop();
-    //         setSongDetails(null);
-    //         setCurrentSongById(null);
-    //     } else {
-    //         setCurrentSongById(songDetails.id);
-    //         setSongDetails(songDetails);
-    //         await loadAndPlaySong(songDetails.id);
-    //     }
-    // }, []);
-
     const handlePlay = useCallback(async () => {
         player.setActiveForLockScreen(true, {
             title: songDetails?.title || undefined,
             artist: undefined,
             albumTitle: undefined,
-            artworkUrl: songDetails?.coverImageUrl || undefined,
+            artworkUrl: undefined,
         });
         player.play();
     }, [player]);

@@ -35,10 +35,14 @@ public record AudioFileSummaryDto(
 public record SongDetailsDto(
     Guid Id,
     string Title,
-    string CoverImageUrl,
     string Genre,
     DateOnly ReleaseDate,
     bool IsExplicit,
     int DurationSeconds,
     IReadOnlyCollection<AudioFileSummaryDto> AvailableQualities
+);
+
+public record PresignedUrl(
+    string Url,
+    DateTimeOffset ExpiresAt
 );

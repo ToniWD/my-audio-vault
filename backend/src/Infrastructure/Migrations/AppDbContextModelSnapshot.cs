@@ -208,7 +208,7 @@ namespace MusicStream.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CoverImageUrl")
+                    b.Property<string>("CoverImageKey")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");

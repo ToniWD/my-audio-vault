@@ -41,8 +41,6 @@ public class ChangeUserPasswordHandler : IRequestHandler<ChangeUserPasswordComma
         if (!result.Succeeded)
         {
             var identityErrors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError("The password for user {UserName} couldn't be changed. Errors: {Errors}", user.UserName, identityErrors);
-
             throw new AppException($"Password change failed: {identityErrors}");
         }
 

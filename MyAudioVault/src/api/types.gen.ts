@@ -56,6 +56,11 @@ export type PatchUserRequest = {
     email?: null | string;
 };
 
+export type PresignedUrl = {
+    url: string;
+    expiresAt: string;
+};
+
 export type ProblemDetails = {
     type?: null | string;
     title?: null | string;
@@ -83,7 +88,6 @@ export type RegisterResponse = {
 export type SongDetailsDto = {
     id: string;
     title: string;
-    coverImageUrl: string;
     genre: string;
     releaseDate: string;
     isExplicit: boolean;
@@ -167,66 +171,6 @@ export type PostApiSongsUploadResponses = {
 
 export type PostApiSongsUploadResponse = PostApiSongsUploadResponses[keyof PostApiSongsUploadResponses];
 
-export type GetApiSongsStreamByTokenData = {
-    body?: never;
-    path: {
-        token: string;
-    };
-    query?: never;
-    url: '/api/songs/stream/{token}';
-};
-
-export type GetApiSongsStreamByTokenErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ProblemDetails;
-    /**
-     * Not Found
-     */
-    404: ProblemDetails;
-};
-
-export type GetApiSongsStreamByTokenError = GetApiSongsStreamByTokenErrors[keyof GetApiSongsStreamByTokenErrors];
-
-export type GetApiSongsStreamByTokenResponses = {
-    /**
-     * OK
-     */
-    200: unknown;
-    /**
-     * Partial Content
-     */
-    206: unknown;
-};
-
-export type PostApiSongsTokenBySongIdData = {
-    body?: never;
-    path: {
-        songId: string;
-    };
-    query?: never;
-    url: '/api/songs/token/{songId}';
-};
-
-export type PostApiSongsTokenBySongIdErrors = {
-    /**
-     * Unauthorized
-     */
-    401: ProblemDetails;
-};
-
-export type PostApiSongsTokenBySongIdError = PostApiSongsTokenBySongIdErrors[keyof PostApiSongsTokenBySongIdErrors];
-
-export type PostApiSongsTokenBySongIdResponses = {
-    /**
-     * OK
-     */
-    200: string;
-};
-
-export type PostApiSongsTokenBySongIdResponse = PostApiSongsTokenBySongIdResponses[keyof PostApiSongsTokenBySongIdResponses];
-
 export type GetApiSongsBySongIdData = {
     body?: never;
     path: {
@@ -257,6 +201,105 @@ export type GetApiSongsBySongIdResponses = {
 };
 
 export type GetApiSongsBySongIdResponse = GetApiSongsBySongIdResponses[keyof GetApiSongsBySongIdResponses];
+
+export type GetApiSongsBySongIdPresignedUrlData = {
+    body?: never;
+    path: {
+        songId: string;
+    };
+    query?: never;
+    url: '/api/songs/{songId}/presigned-url';
+};
+
+export type GetApiSongsBySongIdPresignedUrlErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiSongsBySongIdPresignedUrlError = GetApiSongsBySongIdPresignedUrlErrors[keyof GetApiSongsBySongIdPresignedUrlErrors];
+
+export type GetApiSongsBySongIdPresignedUrlResponses = {
+    /**
+     * OK
+     */
+    200: PresignedUrl;
+};
+
+export type GetApiSongsBySongIdPresignedUrlResponse = GetApiSongsBySongIdPresignedUrlResponses[keyof GetApiSongsBySongIdPresignedUrlResponses];
+
+export type GetApiSongsBySongIdCoverImagePresignedUrlData = {
+    body?: never;
+    path: {
+        songId: string;
+    };
+    query?: never;
+    url: '/api/songs/{songId}/cover-image/presigned-url';
+};
+
+export type GetApiSongsBySongIdCoverImagePresignedUrlErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type GetApiSongsBySongIdCoverImagePresignedUrlError = GetApiSongsBySongIdCoverImagePresignedUrlErrors[keyof GetApiSongsBySongIdCoverImagePresignedUrlErrors];
+
+export type GetApiSongsBySongIdCoverImagePresignedUrlResponses = {
+    /**
+     * OK
+     */
+    200: PresignedUrl;
+};
+
+export type GetApiSongsBySongIdCoverImagePresignedUrlResponse = GetApiSongsBySongIdCoverImagePresignedUrlResponses[keyof GetApiSongsBySongIdCoverImagePresignedUrlResponses];
+
+export type PutApiSongsBySongIdCoverImageData = {
+    body: {
+        file?: IFormFile;
+    };
+    path: {
+        songId: string;
+    };
+    query?: never;
+    url: '/api/songs/{songId}/cover-image';
+};
+
+export type PutApiSongsBySongIdCoverImageErrors = {
+    /**
+     * Bad Request
+     */
+    400: ProblemDetails;
+    /**
+     * Unauthorized
+     */
+    401: ProblemDetails;
+    /**
+     * Not Found
+     */
+    404: ProblemDetails;
+};
+
+export type PutApiSongsBySongIdCoverImageError = PutApiSongsBySongIdCoverImageErrors[keyof PutApiSongsBySongIdCoverImageErrors];
+
+export type PutApiSongsBySongIdCoverImageResponses = {
+    /**
+     * OK
+     */
+    200: PresignedUrl;
+};
+
+export type PutApiSongsBySongIdCoverImageResponse = PutApiSongsBySongIdCoverImageResponses[keyof PutApiSongsBySongIdCoverImageResponses];
 
 export type PostApiAuthRegisterData = {
     body: RegisterRequest;

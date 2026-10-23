@@ -58,7 +58,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
             var song = new Song
             {
                 Title = $"Track Title #{i:00}",
-                CoverImageUrl = $"https://picsum.photos/seed/song{i}/300/300",
+                CoverImageKey = $"https://picsum.photos/seed/song{i}/300/300",
                 Genre = genre,
                 ReleaseDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-i * 15)),
                 IsExplicit = i % 4 == 0,

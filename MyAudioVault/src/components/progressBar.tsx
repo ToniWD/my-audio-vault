@@ -21,6 +21,14 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ player, viewStyle = st
 
 
     useEffect(() => {
+        const curStatus = player.currentStatus;
+
+        if (curStatus.duration > 0) {
+            setProgress((curStatus.currentTime / curStatus.duration) * 100);
+            setCurrentTime(curStatus.currentTime);
+            setDuration(curStatus.duration);
+        }
+
         const subscription = player.addListener("playbackStatusUpdate", async (status) => {
             setCurrentTime(status.currentTime);
             setDuration(status.duration);
@@ -83,6 +91,14 @@ export const ProgressBarForMiniPlayer: React.FC<{ player: AudioPlayer, songDetai
     const [sliderValue, setSliderValue] = useState<number>(0);
 
     useEffect(() => {
+        const curStatus = player.currentStatus;
+
+        if (curStatus.duration > 0) {
+            setProgress((curStatus.currentTime / curStatus.duration) * 100);
+            setCurrentTime(curStatus.currentTime);
+            setDuration(curStatus.duration);
+        }
+
         const subscription = player.addListener("playbackStatusUpdate", async (status) => {
             setCurrentTime(status.currentTime);
             setDuration(status.duration);

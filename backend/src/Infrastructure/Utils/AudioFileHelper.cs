@@ -56,7 +56,7 @@ public static class AudioFileHelper
             Title = songTitle,
             Genre = genre,
             ReleaseDate = releaseDate,
-            CoverImageUrl = string.Empty,
+            CoverImageKey = string.Empty,
             IsExplicit = false
         };
 

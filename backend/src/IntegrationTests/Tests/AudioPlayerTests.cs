@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MusicStream.Application.DTOs;
@@ -42,17 +43,21 @@ public class AudioPlayerTests : IClassFixture<AudioPlayerTestFixture>
         string? search
         )
     {
-        var filter = new SongQueryFilter(
-            pageNumber,
-            pageSize,
-            null,
-            search
-        );
 
-        var httpRequest = new HttpRequestMessage(HttpMethod.Get, "/api/songs")
+        var queryParams = new Dictionary<string, string?>()
         {
-            Content = JsonContent.Create(filter)
+            { nameof(SongQueryFilter.PageNumber), pageNumber.ToString() },
+            { nameof(SongQueryFilter.PageSize), pageSize.ToString() }
         };
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            queryParams.Add(nameof(SongQueryFilter.Search), search);
+        }
+
+        var url = QueryHelpers.AddQueryString("/api/songs", queryParams);
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
 
         httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _fixture.AccessToken);
 
@@ -148,10 +153,22 @@ public class AudioPlayerTests : IClassFixture<AudioPlayerTestFixture>
             search
         );
 
-        var httpRequest = new HttpRequestMessage(HttpMethod.Get, "/api/songs")
+        var queryParams = new Dictionary<string, string?>()
         {
-            Content = JsonContent.Create(filter)
+            { nameof(SongQueryFilter.PageNumber), pageNumber.ToString() },
+            { nameof(SongQueryFilter.PageSize), pageSize.ToString() },
+            { nameof(SongQueryFilter.SortBy), sortBy.ToString() }
         };
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            queryParams.Add(nameof(SongQueryFilter.Search), search);
+        }
+
+        var url = QueryHelpers.AddQueryString("/api/songs", queryParams);
+
+        var httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
+
 
         httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _fixture.AccessToken);
 

@@ -55,8 +55,6 @@ public class CreateUserCommandHandler : IRequestHandler<RegisterRequest, Guid>
         if (!result.Succeeded)
         {
             var identityErrors = string.Join(", ", result.Errors.Select(e => e.Description));
-            _logger.LogError("User registration failed for {Email}. Errors: {Errors}", request.Email, identityErrors);
-
             throw new AppException($"Registration failed: {identityErrors}");
         }
 

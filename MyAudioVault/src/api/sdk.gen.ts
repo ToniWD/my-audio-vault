@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApiUsersByUserIdData, DeleteApiUsersByUserIdErrors, DeleteApiUsersByUserIdResponses, DeleteApiUsersMeData, DeleteApiUsersMeErrors, DeleteApiUsersMeResponses, GetApiAuthHealthData, GetApiAuthHealthResponses, GetApiSongsBySongIdData, GetApiSongsBySongIdErrors, GetApiSongsBySongIdResponses, GetApiSongsData, GetApiSongsErrors, GetApiSongsResponses, GetApiSongsStreamByTokenData, GetApiSongsStreamByTokenErrors, GetApiSongsStreamByTokenResponses, GetApiUsersByUserIdData, GetApiUsersByUserIdErrors, GetApiUsersByUserIdResponses, GetApiUsersMeData, GetApiUsersMeErrors, GetApiUsersMeResponses, PatchApiUsersByUserIdData, PatchApiUsersByUserIdErrors, PatchApiUsersByUserIdResponses, PatchApiUsersMeData, PatchApiUsersMeErrors, PatchApiUsersMeResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthRefreshData, PostApiAuthRefreshErrors, PostApiAuthRefreshResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiSongsTokenBySongIdData, PostApiSongsTokenBySongIdErrors, PostApiSongsTokenBySongIdResponses, PostApiSongsUploadData, PostApiSongsUploadErrors, PostApiSongsUploadResponses, PutApiUsersMePasswordData, PutApiUsersMePasswordErrors, PutApiUsersMePasswordResponses } from './types.gen';
+import type { DeleteApiUsersByUserIdData, DeleteApiUsersByUserIdErrors, DeleteApiUsersByUserIdResponses, DeleteApiUsersMeData, DeleteApiUsersMeErrors, DeleteApiUsersMeResponses, GetApiAuthHealthData, GetApiAuthHealthResponses, GetApiSongsBySongIdCoverImagePresignedUrlData, GetApiSongsBySongIdCoverImagePresignedUrlErrors, GetApiSongsBySongIdCoverImagePresignedUrlResponses, GetApiSongsBySongIdData, GetApiSongsBySongIdErrors, GetApiSongsBySongIdPresignedUrlData, GetApiSongsBySongIdPresignedUrlErrors, GetApiSongsBySongIdPresignedUrlResponses, GetApiSongsBySongIdResponses, GetApiSongsData, GetApiSongsErrors, GetApiSongsResponses, GetApiUsersByUserIdData, GetApiUsersByUserIdErrors, GetApiUsersByUserIdResponses, GetApiUsersMeData, GetApiUsersMeErrors, GetApiUsersMeResponses, PatchApiUsersByUserIdData, PatchApiUsersByUserIdErrors, PatchApiUsersByUserIdResponses, PatchApiUsersMeData, PatchApiUsersMeErrors, PatchApiUsersMeResponses, PostApiAuthLoginData, PostApiAuthLoginErrors, PostApiAuthLoginResponses, PostApiAuthRefreshData, PostApiAuthRefreshErrors, PostApiAuthRefreshResponses, PostApiAuthRegisterData, PostApiAuthRegisterErrors, PostApiAuthRegisterResponses, PostApiSongsUploadData, PostApiSongsUploadErrors, PostApiSongsUploadResponses, PutApiSongsBySongIdCoverImageData, PutApiSongsBySongIdCoverImageErrors, PutApiSongsBySongIdCoverImageResponses, PutApiUsersMePasswordData, PutApiUsersMePasswordErrors, PutApiUsersMePasswordResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -30,11 +30,21 @@ export const postApiSongsUpload = <ThrowOnError extends boolean = false>(options
     }
 });
 
-export const getApiSongsStreamByToken = <ThrowOnError extends boolean = false>(options: Options<GetApiSongsStreamByTokenData, ThrowOnError>): RequestResult<GetApiSongsStreamByTokenResponses, GetApiSongsStreamByTokenErrors, ThrowOnError> => (options.client ?? client).get<GetApiSongsStreamByTokenResponses, GetApiSongsStreamByTokenErrors, ThrowOnError>({ url: '/api/songs/stream/{token}', ...options });
-
-export const postApiSongsTokenBySongId = <ThrowOnError extends boolean = false>(options: Options<PostApiSongsTokenBySongIdData, ThrowOnError>): RequestResult<PostApiSongsTokenBySongIdResponses, PostApiSongsTokenBySongIdErrors, ThrowOnError> => (options.client ?? client).post<PostApiSongsTokenBySongIdResponses, PostApiSongsTokenBySongIdErrors, ThrowOnError>({ url: '/api/songs/token/{songId}', ...options });
-
 export const getApiSongsBySongId = <ThrowOnError extends boolean = false>(options: Options<GetApiSongsBySongIdData, ThrowOnError>): RequestResult<GetApiSongsBySongIdResponses, GetApiSongsBySongIdErrors, ThrowOnError> => (options.client ?? client).get<GetApiSongsBySongIdResponses, GetApiSongsBySongIdErrors, ThrowOnError>({ url: '/api/songs/{songId}', ...options });
+
+export const getApiSongsBySongIdPresignedUrl = <ThrowOnError extends boolean = false>(options: Options<GetApiSongsBySongIdPresignedUrlData, ThrowOnError>): RequestResult<GetApiSongsBySongIdPresignedUrlResponses, GetApiSongsBySongIdPresignedUrlErrors, ThrowOnError> => (options.client ?? client).get<GetApiSongsBySongIdPresignedUrlResponses, GetApiSongsBySongIdPresignedUrlErrors, ThrowOnError>({ url: '/api/songs/{songId}/presigned-url', ...options });
+
+export const getApiSongsBySongIdCoverImagePresignedUrl = <ThrowOnError extends boolean = false>(options: Options<GetApiSongsBySongIdCoverImagePresignedUrlData, ThrowOnError>): RequestResult<GetApiSongsBySongIdCoverImagePresignedUrlResponses, GetApiSongsBySongIdCoverImagePresignedUrlErrors, ThrowOnError> => (options.client ?? client).get<GetApiSongsBySongIdCoverImagePresignedUrlResponses, GetApiSongsBySongIdCoverImagePresignedUrlErrors, ThrowOnError>({ url: '/api/songs/{songId}/cover-image/presigned-url', ...options });
+
+export const putApiSongsBySongIdCoverImage = <ThrowOnError extends boolean = false>(options: Options<PutApiSongsBySongIdCoverImageData, ThrowOnError>): RequestResult<PutApiSongsBySongIdCoverImageResponses, PutApiSongsBySongIdCoverImageErrors, ThrowOnError> => (options.client ?? client).put<PutApiSongsBySongIdCoverImageResponses, PutApiSongsBySongIdCoverImageErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    url: '/api/songs/{songId}/cover-image',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options.headers
+    }
+});
 
 export const postApiAuthRegister = <ThrowOnError extends boolean = false>(options: Options<PostApiAuthRegisterData, ThrowOnError>): RequestResult<PostApiAuthRegisterResponses, PostApiAuthRegisterErrors, ThrowOnError> => (options.client ?? client).post<PostApiAuthRegisterResponses, PostApiAuthRegisterErrors, ThrowOnError>({
     url: '/api/auth/register',

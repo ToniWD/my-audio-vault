@@ -105,6 +105,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ISongRepository, SongRepository>();
+        services.AddScoped<IFileRepository, FileRepository>();
     }
 
     private static void AddAWSServices(this IServiceCollection services, IConfiguration configuration)
@@ -139,23 +140,33 @@ public static class DependencyInjection
         var logger = loggerFactory.CreateLogger(nameof(DependencyInjection));
 
         var storageOptions = scope.ServiceProvider.GetRequiredService<IOptions<S3Settings>>().Value;
-        var bucketName = storageOptions.BucketName;
-        logger.LogInformation($"Check if the \"{bucketName}\" bucket exists");
+        // var bucketName = storageOptions.BucketNameAudioFiles;
 
-        try
+        var buckets = new List<string>
         {
-            bool exists = await AmazonS3Util.DoesS3BucketExistV2Async(s3Client, bucketName);
+            storageOptions.BucketNameAudioFiles,
+            storageOptions.BucketNameImages
+        };
 
-            if (!exists)
+        foreach (var bucketName in buckets)
+        {
+            logger.LogInformation($"Check if the \"{bucketName}\" bucket exists");
+
+            try
             {
-                await s3Client.PutBucketAsync(bucketName);
-                logger.LogInformation("Bucket-ul S3/MinIO '{BucketName}' created.", bucketName);
+                bool exists = await AmazonS3Util.DoesS3BucketExistV2Async(s3Client, bucketName);
+
+                if (!exists)
+                {
+                    await s3Client.PutBucketAsync(bucketName);
+                    logger.LogInformation("Bucket-ul S3/MinIO '{BucketName}' created.", bucketName);
+                }
+                else logger.LogInformation($"The \"{bucketName}\" bucket exists");
             }
-            else logger.LogInformation($"The \"{bucketName}\" bucket exists");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "An error occurred while verifying or creating the MinIO/S3 bucket '{BucketName}'.", bucketName);
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while verifying or creating the MinIO/S3 bucket '{BucketName}'.", bucketName);
+            }
         }
     }
 

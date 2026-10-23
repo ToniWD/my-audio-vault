@@ -16,12 +16,14 @@ public record UploadAudioFileCommand(
 
 public class UploadAudioFile : IRequestHandler<UploadAudioFileCommand, Guid>
 {
-    private readonly ISongRepository _repo;
+    private readonly ISongRepository SongRepo;
+    private readonly IFileRepository FileRepo;
     private readonly ILogger<UploadAudioFile> _logger;
 
-    public UploadAudioFile(ISongRepository repository, ILogger<UploadAudioFile> logger)
+    public UploadAudioFile(ISongRepository repository, IFileRepository fileRepository, ILogger<UploadAudioFile> logger)
     {
-        _repo = repository;
+        SongRepo = repository;
+        FileRepo = fileRepository;
         _logger = logger;
     }
 
@@ -48,8 +50,8 @@ public class UploadAudioFile : IRequestHandler<UploadAudioFileCommand, Guid>
             throw new AppException("The file MIME type is invalid.");
         }
 
-        Song song = await _repo.SaveSongInS3(request.FileStream, request.FileName, request.ContentType, request.FileStream.Length, cancellationToken);
-        song = await _repo.SaveSongMetadataInDb(song);
+        Song song = await FileRepo.SaveSongInS3(request.FileStream, request.FileName, request.ContentType, request.FileStream.Length, cancellationToken);
+        song = await SongRepo.SaveSongMetadataInDb(song);
 
         return song.Id;
     }

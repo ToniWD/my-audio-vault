@@ -71,7 +71,6 @@ public class PatchUserCommandHandler : IRequestHandler<PatchUserCommand>
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                _logger.LogError($"Patch failed: {errors}");
                 throw new AppException("Server error");
             }
         }

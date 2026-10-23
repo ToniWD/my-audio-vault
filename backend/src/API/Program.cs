@@ -4,13 +4,23 @@ using MusicStream.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 var allowExpoOrigin = "_allowExpoOrigin";
+var allowedOrigins = (builder.Configuration["Cors:AllowedOrigins"] ?? string.Empty)
+    .Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: allowExpoOrigin, policy =>
     {
-        policy.WithOrigins("http://localhost:8081", "http://localhost:19006")
-              .AllowAnyHeader()
+        if (allowedOrigins.Length == 0)
+        {
+            policy.AllowAnyOrigin();
+        }
+        else
+        {
+            policy.WithOrigins(allowedOrigins);
+        }
+
+        policy.AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
@@ -35,6 +45,7 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
+app.ApplyDatabaseMigrations();
 await app.EnsureS3BucketCreatedAsync();
 await app.SeedDatabaseAsync();
 
@@ -53,7 +64,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (app.Configuration.GetValue<bool>("HttpsRedirection:Enabled"))
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseExceptionHandler();
 
 app.MapControllers();

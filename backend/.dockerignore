@@ -1,0 +1,30 @@
+# Build output and IDE files
+**/bin/
+**/obj/
+**/TestResults/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+
+# Local configuration and secrets (configuration is supplied through env vars)
+.env
+.env.*
+!.env.example
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/example.appsettings.json
+
+# Things that are not part of the image
+.git/
+.github/
+docs/
+**/node_modules/
+**/README.md
+docker-compose*.yml
+Dockerfile*
+.gitignore
+backend.slnx
+src/UnitTests/
+src/IntegrationTests/

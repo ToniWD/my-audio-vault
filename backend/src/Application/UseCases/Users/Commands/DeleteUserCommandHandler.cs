@@ -50,11 +50,7 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand>
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Code + ": " + e.Description));
 
-            _logger.LogError("Failed to delete user {UserId}. Errors: {Errors}", request.UserId, errors);
-
             throw new AppException("An unexpected error occurred while deleting the user account.");
         }
-
-        _logger.LogInformation("User account {UserId} was successfully deleted.", request.UserId);
     }
 }

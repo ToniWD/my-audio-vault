@@ -34,7 +34,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
                 .IsRequired()
                 .HasMaxLength(200);
 
-            entity.Property(s => s.CoverImageUrl)
+            entity.Property(s => s.CoverImageKey)
                 .IsRequired()
                 .HasMaxLength(500);
 

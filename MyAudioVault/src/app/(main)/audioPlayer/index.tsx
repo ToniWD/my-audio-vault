@@ -10,6 +10,7 @@ import { SongDetailsDto } from '@/api';
 import { Playlist } from '@/components/playlist';
 import { useSafeBack } from '@/hooks/useSafeBack';
 import { router } from 'expo-router';
+import SongCover from '@/components/songCover';
 
 const ARTWORK_URI = 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800';
 
@@ -70,12 +71,7 @@ export default function AudioPlayerScreen() {
                 {/* ------------------------------------------------ artwork */}
                 <View style={[styles.artworkColumn, isWide && styles.artworkColumnWide]}>
                     <View style={styles.artworkFrame}>
-                        <Image
-                            source={{ uri: songDetails?.coverImageUrl || ARTWORK_URI }}
-                            style={styles.artwork}
-                            resizeMode="cover"
-                            accessibilityLabel="Album artwork"
-                        />
+                        <SongCover songId={songDetails?.id || null} style={styles.artwork} />
                     </View>
 
                     <View style={styles.artworkMeta}>

@@ -5,7 +5,7 @@ public class Song
     public Guid Id { get; private set; } = Guid.NewGuid();
 
     public required string Title { get; set; }
-    public required string CoverImageUrl { get; set; }
+    public required string CoverImageKey { get; set; }
 
     public required string Genre { get; set; }
     public DateOnly ReleaseDate { get; set; }

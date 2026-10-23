@@ -20,6 +20,7 @@ services:
   minio:
     image: quay.io/minio/minio
     container_name: music_player_minio
+    restart: unless-stopped
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -36,11 +37,64 @@ services:
       retries: 5
 
   redis:
-        image: redis:latest
-        container_name: music_player_redis
-        ports:
-            - '6379:6379'
-        volumes:
-            - ${VOLUME_PATH:-.}/redis/data:/data
-        command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes"]
-        restart: unless-stopped
+    image: redis:latest
+    container_name: music_player_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - ${VOLUME_PATH:-.}/redis/data:/data
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: music-stream-api:latest
+    container_name: music_stream_api
+    restart: unless-stopped
+    depends_on:
+      music-player-db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-5204}:8080"
+    environment:
+      # ASP.NET Core configuration. Every key in src/API/appsettings.json can
+      # be overridden here using the double-underscore env-var convention.
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_HTTP_PORTS: 8080
+
+      ConnectionStrings__DefaultConnection: "Host=music-player-db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ConnectionStrings__Redis: "redis:6379,password=${REDIS_PASSWORD},abortConnect=false,connectRetry=3"
+
+      Authentication__TokenSecret: ${AUTH_TOKEN_SECRET:?Set AUTH_TOKEN_SECRET in backend/.env}
+      Authentication__RefreshTokenSecret: ${AUTH_REFRESH_TOKEN_SECRET:?Set AUTH_REFRESH_TOKEN_SECRET in backend/.env}
+      Authentication__Issuer: ${AUTH_ISSUER:-http://localhost:5204}
+      Authentication__Audience: ${AUTH_AUDIENCE:-http://localhost:8081/}
+
+      AWS__AccessKey: ${MINIO_ROOT_USER}
+      AWS__SecretKey: ${MINIO_ROOT_PASSWORD}
+      AWS__BucketName: ${S3_BUCKET_NAME:-audio-vault}
+      AWS__Region: ${S3_REGION:-eu-central-1}
+      AWS__ServiceUrl: http://minio:9000
+      AWS__ForcePathStyle: "true"
+
+      Cors__AllowedOrigins: ${CORS_ALLOWED_ORIGINS:-http://localhost:8081,http://localhost:19006}
+      HttpsRedirection__Enabled: "false"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/api/auth/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
