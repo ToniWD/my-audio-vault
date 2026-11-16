@@ -65,7 +65,7 @@ export const Playlist: React.FC<PlaylistProps> = ({
                 style={({ pressed }) => [
                     styles.songCard,
                     isActive && styles.songCardActive,
-                    pressed && styles.pressed,
+                    pressed && globalStyles.pressed,
                 ]}
                 onPress={() => {
                     console.log(`Song pressed: ${item.title} (index: ${index}) ${onSongPress ? 'with onSongPress callback' : 'without onSongPress callback'}`);
@@ -136,7 +136,7 @@ export const Playlist: React.FC<PlaylistProps> = ({
     const listHeader = (
         <View style={styles.header}>
             <View style={globalStyles.flex1}>
-                <Text style={styles.eyebrow}>PLAYLIST</Text>
+                <Text style={globalStyles.eyebrow}>PLAYLIST</Text>
                 <Text style={styles.playlistTitle}>Up Next</Text>
                 <Text style={styles.playlistSubtitle}>
                     {songsDetails.length} {songsDetails.length === 1 ? 'track' : 'tracks'}
@@ -188,32 +188,26 @@ const styles = StyleSheet.create({
         gap: 16,
         marginBottom: 20,
     },
-    eyebrow: {
-        color: Colors.mainTheme.textMuted,
-        fontSize: 11,
-        fontWeight: '700',
-        letterSpacing: 2.5,
-        fontFamily: Fonts.monoBold,
-        marginBottom: 8,
-    },
     playlistTitle: {
-        fontSize: 30,
+        fontSize: 28,
+        letterSpacing: 1,
         color: Colors.mainTheme.textPrimary,
-        fontFamily: Fonts.monoRegular,
+        fontFamily: Fonts.monoBold,
     },
     playlistSubtitle: {
         color: Colors.mainTheme.textSecondary,
-        fontSize: 14,
+        fontSize: 13,
+        letterSpacing: 0.5,
         fontFamily: Fonts.monoRegular,
         marginTop: 6,
     },
     iconButton: {
         width: 44,
         height: 44,
-        borderRadius: 22,
+        borderRadius: 3,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: Colors.mainTheme.surface,
+        backgroundColor: Colors.mainTheme.surfaceRaised,
         borderWidth: 1,
         borderColor: Colors.mainTheme.border,
     },
@@ -230,7 +224,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.mainTheme.surface,
         borderWidth: 1,
         borderColor: Colors.mainTheme.border,
-        borderRadius: 16,
+        borderRadius: 4,
         padding: 12,
         marginBottom: 12,
     },
@@ -238,15 +232,12 @@ const styles = StyleSheet.create({
         borderColor: Colors.mainTheme.borderActive,
         backgroundColor: Colors.mainTheme.primaryBg,
     },
-    pressed: {
-        opacity: 0.7,
-    },
 
     // ---------------------------------------------------------------- artwork
     artworkFrame: {
         width: 56,
         height: 56,
-        borderRadius: 12,
+        borderRadius: 2,
         padding: 4,
         backgroundColor: Colors.mainTheme.background,
         borderWidth: 1,
@@ -255,7 +246,7 @@ const styles = StyleSheet.create({
     artwork: {
         flex: 1,
         width: '100%',
-        borderRadius: 8,
+        borderRadius: 1,
         backgroundColor: Colors.mainTheme.background,
     },
 
@@ -273,7 +264,8 @@ const styles = StyleSheet.create({
     songTitle: {
         flexShrink: 1,
         color: Colors.mainTheme.textPrimary,
-        fontSize: 16,
+        fontSize: 15,
+        letterSpacing: 0.4,
         fontFamily: Fonts.monoBold,
     },
     songTitleActive: {
@@ -281,7 +273,8 @@ const styles = StyleSheet.create({
     },
     songMeta: {
         color: Colors.mainTheme.textSecondary,
-        fontSize: 12,
+        fontSize: 11,
+        letterSpacing: 0.4,
         fontFamily: Fonts.monoRegular,
     },
     songFooter: {
@@ -291,12 +284,12 @@ const styles = StyleSheet.create({
     },
     songTag: {
         color: Colors.mainTheme.textMuted,
-        fontSize: 10,
+        fontSize: 9,
         letterSpacing: 1.5,
         fontFamily: Fonts.monoBold,
         borderWidth: 1,
         borderColor: Colors.mainTheme.border,
-        borderRadius: 6,
+        borderRadius: 2,
         paddingHorizontal: 6,
         paddingVertical: 2,
         overflow: 'hidden',
@@ -304,7 +297,7 @@ const styles = StyleSheet.create({
     explicitBadge: {
         width: 16,
         height: 16,
-        borderRadius: 4,
+        borderRadius: 1,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: Colors.mainTheme.border,
@@ -322,8 +315,8 @@ const styles = StyleSheet.create({
     },
     duration: {
         color: Colors.mainTheme.textSecondary,
-        fontSize: 12,
-        letterSpacing: 0.5,
+        fontSize: 11,
+        letterSpacing: 1,
         fontFamily: Fonts.monoRegular,
     },
 
@@ -336,16 +329,18 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.mainTheme.surface,
         borderWidth: 1,
         borderColor: Colors.mainTheme.border,
-        borderRadius: 16,
+        borderRadius: 4,
     },
     emptyTitle: {
         color: Colors.mainTheme.textPrimary,
-        fontSize: 16,
+        fontSize: 15,
+        letterSpacing: 0.6,
         fontFamily: Fonts.monoBold,
     },
     emptyText: {
         color: Colors.mainTheme.textSecondary,
-        fontSize: 13,
+        fontSize: 12,
+        letterSpacing: 0.3,
         fontFamily: Fonts.monoRegular,
         textAlign: 'center',
     },

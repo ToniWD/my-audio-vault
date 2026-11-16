@@ -84,7 +84,7 @@ export default function AudioPlayerScreen() {
                 <View style={[styles.detailsColumn, isWide && styles.detailsColumnWide]}>
                     <View style={styles.trackHeader}>
                         <View style={globalStyles.flex1}>
-                            <Text style={styles.eyebrow}>NOW PLAYING</Text>
+                            <Text style={globalStyles.eyebrow}>NOW PLAYING</Text>
                             <Text style={[globalStyles.title, styles.trackTitle]} numberOfLines={1}>
                                 {songDetails?.title || 'Unknown Title'}
                             </Text>
@@ -108,7 +108,7 @@ export default function AudioPlayerScreen() {
                     {/* -------------------------------------------- controls */}
                     <View style={styles.controls}>
                         <Pressable
-                            style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+                            style={({ pressed }) => [globalStyles.secondaryButton, pressed && globalStyles.pressed]}
                             accessibilityRole="button"
                             accessibilityLabel="Shuffle"
                         >
@@ -116,7 +116,7 @@ export default function AudioPlayerScreen() {
                         </Pressable>
 
                         <Pressable
-                            style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+                            style={({ pressed }) => [globalStyles.secondaryButton, pressed && globalStyles.pressed]}
                             accessibilityRole="button"
                             accessibilityLabel="Previous track"
                             onPress={previous}
@@ -125,7 +125,7 @@ export default function AudioPlayerScreen() {
                         </Pressable>
 
                         <Pressable
-                            style={({ pressed }) => [styles.playButton, pressed && styles.pressed]}
+                            style={({ pressed }) => [globalStyles.playButton, pressed && globalStyles.pressed]}
                             accessibilityRole="button"
                             accessibilityLabel="Play"
                             onPress={handleTogglePlayPress}
@@ -138,7 +138,7 @@ export default function AudioPlayerScreen() {
                         </Pressable>
 
                         <Pressable
-                            style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+                            style={({ pressed }) => [globalStyles.secondaryButton, pressed && globalStyles.pressed]}
                             accessibilityRole="button"
                             accessibilityLabel="Next track"
                             onPress={next}
@@ -147,7 +147,7 @@ export default function AudioPlayerScreen() {
                         </Pressable>
 
                         <Pressable
-                            style={({ pressed }) => [styles.secondaryButton, pressed && styles.pressed]}
+                            style={({ pressed }) => [globalStyles.secondaryButton, pressed && globalStyles.pressed]}
                             accessibilityRole="button"
                             accessibilityLabel="Repeat"
                         >
@@ -159,7 +159,7 @@ export default function AudioPlayerScreen() {
                     {!isWide &&
                         <View style={styles.footerCard}>
                             {/* <Pressable
-                            style={({ pressed }) => [styles.footerAction, pressed && styles.pressed]}
+                            style={({ pressed }) => [styles.footerAction, pressed && globalStyles.pressed]}
                             accessibilityRole="button"
                             accessibilityLabel="Volume"
                         >
@@ -170,7 +170,7 @@ export default function AudioPlayerScreen() {
                         <View style={styles.footerDivider} /> */}
 
                             <Pressable
-                                style={({ pressed }) => [styles.footerAction, pressed && styles.pressed]}
+                                style={({ pressed }) => [styles.footerAction, pressed && globalStyles.pressed]}
                                 accessibilityRole="button"
                                 accessibilityLabel="Open queue"
                                 onPress={!isWide ? toggleView : undefined}
@@ -202,13 +202,13 @@ export default function AudioPlayerScreen() {
                     {!isWide && viewMode === 'playlist' && (
                         <View style={styles.toggleHeader}>
                             <Pressable
-                                style={({ pressed }) => [styles.toggleButton, pressed && styles.pressed]}
+                                style={({ pressed }) => [globalStyles.toggleButton, pressed && globalStyles.pressed]}
                                 onPress={toggleView}
                                 accessibilityRole="button"
                                 accessibilityLabel="Back to player"
                             >
                                 <Feather name="arrow-left" size={18} color={Colors.mainTheme.primary} />
-                                <Text style={styles.toggleText}>Back to Player</Text>
+                                <Text style={globalStyles.toggleText}>Back to Player</Text>
                             </Pressable>
                         </View>
                     )}
@@ -255,26 +255,9 @@ const styles = StyleSheet.create({
         paddingTop: 4,
         paddingBottom: 12,
     },
-    toggleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 10,
-        backgroundColor: Colors.mainTheme.surface,
-        borderWidth: 1,
-        borderColor: Colors.mainTheme.border,
-        borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-    },
-    toggleText: {
-        color: Colors.mainTheme.textPrimary,
-        fontSize: 14,
-        fontFamily: Fonts.monoBold,
-    },
     toggleBadge: {
         backgroundColor: Colors.mainTheme.primaryBg,
-        borderRadius: 10,
+        borderRadius: 2,
         paddingHorizontal: 8,
         paddingVertical: 2,
         borderWidth: 1,
@@ -282,7 +265,8 @@ const styles = StyleSheet.create({
     },
     toggleBadgeText: {
         color: Colors.mainTheme.primary,
-        fontSize: 11,
+        fontSize: 10,
+        letterSpacing: 1,
         fontFamily: Fonts.monoBold,
     },
     viewContainer: {
@@ -290,8 +274,9 @@ const styles = StyleSheet.create({
     },
     footerCount: {
         color: Colors.mainTheme.textMuted,
-        fontSize: 12,
-        fontFamily: Fonts.monoRegular,
+        fontSize: 11,
+        letterSpacing: 1,
+        fontFamily: Fonts.monoBold,
     },
 
     scrollContent: {
@@ -331,13 +316,15 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: Colors.mainTheme.surface,
         borderWidth: 1,
+        borderTopWidth: 2,
         borderColor: Colors.mainTheme.border,
-        borderRadius: 20,
+        borderTopColor: Colors.mainTheme.primaryMuted,
+        borderRadius: 4,
     },
     artwork: {
         flex: 1,
         width: '100%',
-        borderRadius: 12,
+        borderRadius: 2,
         backgroundColor: Colors.mainTheme.background,
     },
     artworkMeta: {
@@ -348,10 +335,10 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
     artworkMetaText: {
-        color: Colors.mainTheme.textSecondary,
-        fontSize: 12,
-        letterSpacing: 1.5,
-        fontFamily: Fonts.monoRegular,
+        color: Colors.mainTheme.textMuted,
+        fontSize: 10,
+        letterSpacing: 2,
+        fontFamily: Fonts.monoBold,
     },
 
     // ----------------------------------------------------------------- details
@@ -367,31 +354,25 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         gap: 16,
     },
-    eyebrow: {
-        color: Colors.mainTheme.textMuted,
-        fontSize: 11,
-        fontWeight: '700',
-        letterSpacing: 2.5,
-        fontFamily: Fonts.monoBold,
-        marginBottom: 8,
-    },
     trackTitle: {
         fontSize: 30,
+        letterSpacing: 1,
         marginBottom: 0,
     },
     trackArtist: {
         color: Colors.mainTheme.textSecondary,
-        fontSize: 16,
+        fontSize: 15,
+        letterSpacing: 0.4,
         fontFamily: Fonts.monoRegular,
         marginTop: 6,
     },
     iconButton: {
         width: 44,
         height: 44,
-        borderRadius: 22,
+        borderRadius: 3,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: Colors.mainTheme.surface,
+        backgroundColor: Colors.mainTheme.surfaceRaised,
         borderWidth: 1,
         borderColor: Colors.mainTheme.border,
     },
@@ -403,41 +384,15 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 24,
     },
-    secondaryButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: Colors.mainTheme.surface,
-        borderWidth: 1,
-        borderColor: Colors.mainTheme.border,
-    },
-    playButton: {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: Colors.mainTheme.primary,
-        shadowColor: Colors.mainTheme.primary,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.35,
-        shadowRadius: 14,
-        elevation: 6,
-    },
-    pressed: {
-        opacity: 0.7,
-    },
 
     // ------------------------------------------------------------------ footer
     footerCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: Colors.mainTheme.surface,
+        backgroundColor: Colors.mainTheme.surfaceRaised,
         borderWidth: 1,
         borderColor: Colors.mainTheme.border,
-        borderRadius: 16,
+        borderRadius: 4,
         paddingHorizontal: 8,
         marginTop: 24,
     },
@@ -452,11 +407,13 @@ const styles = StyleSheet.create({
     footerDivider: {
         width: 1,
         height: 28,
-        backgroundColor: Colors.mainTheme.border,
+        backgroundColor: Colors.mainTheme.borderSubtle,
     },
     footerLabel: {
         color: Colors.mainTheme.textSecondary,
-        fontSize: 13,
-        fontFamily: Fonts.monoRegular,
+        fontSize: 11,
+        letterSpacing: 1.4,
+        textTransform: 'uppercase',
+        fontFamily: Fonts.monoBold,
     },
 });

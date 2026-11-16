@@ -72,6 +72,8 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ player, viewStyle = st
                 minimumValue={0}
                 maximumValue={100}
                 thumbTintColor={Colors.mainTheme.primary}
+                minimumTrackTintColor={Colors.mainTheme.primary}
+                maximumTrackTintColor={Colors.mainTheme.border}
             />
 
             <View style={styles.timeRow}>
@@ -143,6 +145,8 @@ export const ProgressBarForMiniPlayer: React.FC<{ player: AudioPlayer, songDetai
                 minimumValue={0}
                 maximumValue={100}
                 thumbTintColor={Colors.mainTheme.primary}
+                minimumTrackTintColor={Colors.mainTheme.primary}
+                maximumTrackTintColor={Colors.mainTheme.border}
             />
 
             <View style={[styles.timeRow, { marginTop: 0 }]}>
@@ -162,8 +166,10 @@ const styles = StyleSheet.create({
     progressCard: {
         backgroundColor: Colors.mainTheme.surface,
         borderWidth: 1,
+        borderTopWidth: 2,
         borderColor: Colors.mainTheme.border,
-        borderRadius: 16,
+        borderTopColor: Colors.mainTheme.primaryMuted,
+        borderRadius: 4,
         padding: 20,
         marginTop: 24,
     },
@@ -197,8 +203,8 @@ const styles = StyleSheet.create({
     },
     time: {
         color: Colors.mainTheme.textSecondary,
-        fontSize: 12,
-        letterSpacing: 0.5,
+        fontSize: 11,
+        letterSpacing: 1,
         fontFamily: Fonts.monoRegular,
     },
 });

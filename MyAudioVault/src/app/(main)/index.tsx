@@ -15,7 +15,7 @@ export default function MainIndex() {
             <Text style={globalStyles.title}>MyAudioVault</Text>
             <Text style={globalStyles.subtitle}>Welcome, {user?.firstName ?? user?.email}</Text>
             <Text style={[globalStyles.caption, styles.role]}>Role: {user ? RoleLabels[user.role] : 'Unknown'}</Text>
-            <Button title='Test Play' onPress={async () => {
+            <Button title='Test Play' color={Colors.mainTheme.primary} onPress={async () => {
                 await generatePlaylist();
                 router.push('/audioPlayer')
             }} />
@@ -26,6 +26,8 @@ export default function MainIndex() {
 const styles = StyleSheet.create({
     role: {
         color: Colors.mainTheme.textMuted,
+        letterSpacing: 1.6,
+        textTransform: 'uppercase',
         marginBottom: 32,
     },
 });
