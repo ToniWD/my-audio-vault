@@ -1,63 +1,75 @@
-// Culori brute (Palette)
+// Raw palette (HUD / deep-space terminal)
 const TerminalPalette = {
-    // Pure Black & Dark Charcoal
+    // Deep space blacks & panels
     black: '#000000',
-    darkBg: '#0D1117',       // Fundal închis cu tentă subtilă
-    surfaceBg: '#161B22',    // Fundal pentru carduri / input-uri / header
-    borderDark: '#21262D',   // Contururi discrete
+    darkBg: '#05070C',       // Fundal principal, aproape negru cu tentă rece
+    surfaceBg: '#0A111C',    // Panouri / carduri / header
+    raisedBg: '#0E1725',     // Panouri ridicate (butoane, dialoguri)
+    inputBg: '#070D16',      // Fundal pentru input-uri
+    borderDark: '#172638',   // Contururi principale
+    borderSoft: '#0F1C2C',   // Contururi discrete / separatoare
 
-    // Greens (Neon & Muted)
-    neonGreen: '#00FF66',    // Verde clasic fosforescent (Matrix / Monocrom)
-    brightGreen: '#39FF14',  // Accent verde aprins
-    dimGreen: '#00FF66AA',   // Verde semi-transparent pentru opacitate
-    mutedGreen: '#009944',  // Verde mai stins pentru detalii
-    darkGreen: '#052E16',    // Fundal pentru butoane sau badge-uri active
+    // Cyan (electric HUD accent)
+    neonCyan: '#22E6FF',     // Accent principal fosforescent
+    brightCyan: '#67F3FF',   // Accent aprins (hover / highlight)
+    dimCyan: '#22E6FFAA',    // Cyan semi-transparent
+    mutedCyan: '#0E7C8C',    // Cyan stins pentru detalii
+    deepCyan: '#04222B',     // Fundal pentru elemente active
 
-    // Secondary Text & UI
-    terminalGray: '#8B949E', // Text secundar / comentarii de cod
+    // Secondary text & UI
+    textPrimary: '#E7F7FF',  // Text principal, alb cu tentă rece
+    terminalGray: '#7C94AA', // Text secundar / metadate
+    textMuted: '#4C6A82',    // Text discret / eyebrow
 
-    // Alerts & Highlights
-    neonRed: '#FF3366',      // Erori / Alerte
-    neonAmber: '#FFB000',    // Avertismente (Warnings)
+    // Alerts & highlights
+    neonRed: '#FF3B6B',      // Erori / Alerte
+    neonAmber: '#FFB020',    // Avertismente (Warnings)
+    neonMint: '#3DFFB0',     // Succes
 
-    // Links
-    neonCyan: '#00F0FF',
+    // Secondary accent
+    electricIndigo: '#7A6CFF',
 
     // Overlay
-    scrim: 'rgba(0, 0, 0, 0.5)',       // Fundal pentru overlay-uri (modale)
+    scrim: 'rgba(2, 4, 8, 0.72)', // Fundal pentru overlay-uri (modale)
 };
 
 export const Colors = {
-    // Tema Terminal / Hacker Mode
+    // Tema futuristă / HUD terminal
     mainTheme: {
         // Fundaluri
         background: TerminalPalette.darkBg,
         surface: TerminalPalette.surfaceBg,
+        surfaceRaised: TerminalPalette.raisedBg,
+        inputBackground: TerminalPalette.inputBg,
         headerBackground: TerminalPalette.black,
 
         // Text
-        textPrimary: TerminalPalette.neonGreen,    // Textul principal verde aprins
-        textSecondary: TerminalPalette.terminalGray, // Subtitluri, placeholder-i, date
-        textMuted: TerminalPalette.mutedGreen,     // Text discret/secundar verde
+        textPrimary: TerminalPalette.textPrimary,
+        textSecondary: TerminalPalette.terminalGray,
+        textMuted: TerminalPalette.textMuted,
 
         // Elemente Interactive (Butoane, Iconițe)
-        primary: TerminalPalette.neonGreen,
-        primaryBg: TerminalPalette.darkGreen,
-        headerIcon: TerminalPalette.neonGreen,
+        primary: TerminalPalette.neonCyan,
+        primaryBright: TerminalPalette.brightCyan,
+        primaryMuted: TerminalPalette.mutedCyan,
+        primaryBg: TerminalPalette.deepCyan,
+        headerIcon: TerminalPalette.brightCyan,
         border: TerminalPalette.borderDark,
-        borderActive: TerminalPalette.neonGreen,
+        borderSubtle: TerminalPalette.borderSoft,
+        borderActive: TerminalPalette.neonCyan,
+
+        // Accent secundar
+        accent: TerminalPalette.electricIndigo,
 
         // Stări
         error: TerminalPalette.neonRed,
         warning: TerminalPalette.neonAmber,
-        success: TerminalPalette.brightGreen,
+        success: TerminalPalette.neonMint,
 
         // Overlay
         scrim: TerminalPalette.scrim,
 
-        link: TerminalPalette.neonCyan,          // sau TerminalPalette.electricIndigo
-        linkHover: TerminalPalette.brightGreen,
+        link: TerminalPalette.neonCyan,
+        linkHover: TerminalPalette.brightCyan,
     },
-
-    // Poți păstra și alte teme aici dacă dorești (ex: light, dark)
 };
