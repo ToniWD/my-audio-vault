@@ -9,8 +9,6 @@ export interface AudioPlayerContextType {
     songDetails: null | SongDetailsDto | undefined;
     playlist: SongDetailsDto[];
     autoPlayNextTrack: boolean
-    // setSongById: (songId: string | null) => Promise<void>;
-    // setSongDetails: (songDetails: SongDetailsDto) => Promise<void>;
     setPlaylist: (songsList: SongDetailsDto[]) => void;
     stop: () => Promise<void>;
     play: () => Promise<void>;
@@ -18,12 +16,11 @@ export interface AudioPlayerContextType {
     next: () => Promise<void>;
     previous: () => Promise<void>;
     generatePlaylist: () => Promise<void>;
+    generatePlaylistStartingWithSong: (songDetails: SongDetailsDto) => Promise<void>;
     setAutoPlayNextTrack: (enable: boolean) => void;
 }
 
 const AudioPlayerContext = createContext<AudioPlayerContextType | undefined>(undefined);
-
-const API_BASE_URL = "http://localhost:5204";
 
 export function AudioPlayerProvider({ children }: { children: React.ReactNode }) {
 
@@ -194,6 +191,38 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         }
     }, [player]);
 
+    const handleGeneratePlaylistStartingWithSong = useCallback(async (songDetails: SongDetailsDto) => {
+        const result = await getApiSongs({
+            query: {
+                PageNumber: 0,
+                PageSize: 20,
+                SortBy: undefined,
+                Search: undefined
+            }
+        });
+
+        if (result.error) {
+            console.error('Error fetching songs:', result.error);
+            return;
+        }
+
+        if (result.data?.data && result.data.data.length > 0) {
+            const rawPlaylist = [songDetails, ...result.data.data];
+
+            const uniquePlaylist = Array.from(
+                new Map(rawPlaylist.map(song => [song.id, song])).values()
+            );
+
+            setPlaylist(uniquePlaylist);
+
+            const freshCurrentSongId = useMusicStore.getState().currentSongId;
+
+            if (freshCurrentSongId) {
+                await loadAndPlaySong(freshCurrentSongId);
+            }
+        }
+    }, [player]);
+
     const handleSetPlaylist = useCallback(async (songsList: SongDetailsDto[]) => {
         if (songsList.length === 0) {
             handleStop();
@@ -240,6 +269,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
                 next: handleNext,
                 previous: handlePrevious,
                 generatePlaylist: handleGeneratePlaylist,
+                generatePlaylistStartingWithSong: handleGeneratePlaylistStartingWithSong,
                 setPlaylist: handleSetPlaylist,
                 playFromCurrentPlaylist: handlePlayFromCurrentPlaylist,
                 setAutoPlayNextTrack: (enable) => { setAutoPlayNextTrack(enable) },

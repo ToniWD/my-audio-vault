@@ -12,8 +12,13 @@ export const MiniPlayer: React.FC = () => {
     const [isPlaying, setIsPlaying] = useState(false);
 
     useEffect(() => {
-        setIsPlaying(player.playing);
-    }, []);
+        const subscription = player.addListener('playbackStatusUpdate', (status) => {
+            setIsPlaying(status.playing)
+        })
+        return () => {
+            subscription.remove();
+        };
+    }, [player]);
 
     const handleTogglePlayPress = () => {
         if (player.playing) {
@@ -101,5 +106,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: 10,
+        gap: 10
     },
 });

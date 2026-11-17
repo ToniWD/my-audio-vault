@@ -26,7 +26,6 @@ export const usePresignedUrlCache = create<PresignedUrlsCache>((set, get) => ({
         }
 
         try {
-            console.log("Fetch Image")
             const result = await getApiSongsBySongIdCoverImagePresignedUrl({
                 path: {
                     songId: songId
@@ -34,7 +33,6 @@ export const usePresignedUrlCache = create<PresignedUrlsCache>((set, get) => ({
             });
 
             if (result.data) {
-                console.log(result.data);
                 const data = result.data;
 
                 set((state) => {

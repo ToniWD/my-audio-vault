@@ -5,27 +5,11 @@ import { globalStyles } from '@/constants/globalStyles';
 import { useMusicStore } from '@/hooks/useMusicStore';
 import Feather from '@react-native-vector-icons/feather';
 import { FlatList, Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { useAudioPlayerContext } from '@/contexts/audioPlayerContext';
 import SongCover from './songCover';
+import { formatDuration } from '@/utils/format';
 
 const FALLBACK_ARTWORK =
     'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800';
-
-/**
- * Formats a duration coming from the API (`number | string`) as `mm:ss`.
- */
-const formatDuration = (duration: number | string | undefined): string => {
-    const total = Number(duration ?? 0);
-
-    if (!Number.isFinite(total) || total <= 0) {
-        return '--:--';
-    }
-
-    const minutes = Math.floor(total / 60);
-    const seconds = Math.floor(total % 60);
-
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-};
 
 export interface PlaylistProps {
     /** Songs rendered as a scrollable list. */
@@ -42,10 +26,6 @@ export interface PlaylistProps {
 
 /**
  * Scrollable list of songs, styled after the audio player screen
- * (terminal surfaces, mono type, neon accent on the active track).
- *
- * Render it inside `globalStyles.screen` to get the same padding as the
- * audio player screen.
  */
 export const Playlist: React.FC<PlaylistProps> = ({
     songsDetails,
@@ -76,16 +56,7 @@ export const Playlist: React.FC<PlaylistProps> = ({
                 accessibilityState={{ selected: isActive }}
             >
                 {/* ------------------------------------------------ artwork */}
-                <View style={styles.artworkFrame}>
-                    {/* <Image
-                        source={{ uri: item.coverImageUrl || FALLBACK_ARTWORK }}
-                        style={styles.artwork}
-                        resizeMode="cover"
-                        accessibilityLabel={`${item.title} cover`}
-                    /> */}
-                    <SongCover songId={item.id} style={styles.artwork} />
-                </View>
-
+                <SongCover songId={item.id} style={styles.artwork} />
                 {/* -------------------------------------------------- details */}
                 <View style={styles.songInfo}>
                     <View style={styles.songTitleRow}>
@@ -238,16 +209,9 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 2,
-        padding: 4,
         backgroundColor: Colors.mainTheme.background,
         borderWidth: 1,
         borderColor: Colors.mainTheme.border,
-    },
-    artwork: {
-        flex: 1,
-        width: '100%',
-        borderRadius: 1,
-        backgroundColor: Colors.mainTheme.background,
     },
 
     // ---------------------------------------------------------------- details
