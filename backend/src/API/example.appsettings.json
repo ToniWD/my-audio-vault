@@ -22,6 +22,8 @@
     "BucketName": "audio-vault",
     "Region": "eu-central-1",
     "ServiceUrl": "http://localhost:9000",
+    "PublicServiceUrl": "https://your.public.domain:9000",
+    "PublicServiceUrlUseHTTPS": true,
     "ForcePathStyle": true
   }
 }

@@ -8,5 +8,7 @@ public record S3Settings
     public required string BucketNameImages { get; init; }
     public required string Region { get; init; }
     public required string ServiceUrl { get; init; }
+    public required string PublicServiceUrl { get; init; }
+    public required bool PublicServiceUrlUseHTTPS { get; init; }
     public required bool ForcePathStyle { get; init; }
 };

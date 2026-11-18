@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Amazon.S3.Model;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MusicStream.Application.Configuration;
@@ -15,18 +16,31 @@ namespace MusicStream.Infrastructure.Data;
 public class FileRepository : IFileRepository
 {
     private readonly AppDbContext _dbContext;
-    private readonly IAmazonS3 _s3Client;
+    private readonly IAmazonS3 _s3Internal;
+    private readonly IAmazonS3 _s3Public;
     private readonly string BucketNameForAudioFiles;
     private readonly string BucketNameForImages;
     private readonly ILogger<FileRepository> _logger;
+    private readonly Protocol protocolForPublicUrl;
 
-    public FileRepository(AppDbContext dbDbContext, IAmazonS3 client, IOptions<S3Settings> options, ILogger<FileRepository> logger)
+    public FileRepository(AppDbContext dbDbContext, [FromKeyedServices("Internal")] IAmazonS3 s3Internal,
+        [FromKeyedServices("Public")] IAmazonS3 s3Public, IOptions<S3Settings> options, ILogger<FileRepository> logger)
     {
         _dbContext = dbDbContext;
-        _s3Client = client;
+        _s3Internal = s3Internal;
+        _s3Public = s3Public;
         BucketNameForAudioFiles = options.Value.BucketNameAudioFiles;
         BucketNameForImages = options.Value.BucketNameImages;
         _logger = logger;
+
+        if (options.Value.PublicServiceUrlUseHTTPS)
+        {
+            protocolForPublicUrl = Protocol.HTTPS;
+        }
+        else
+        {
+            protocolForPublicUrl = Protocol.HTTP;
+        }
     }
 
     public PresignedUrl GetPresignedUrl(string key, StoredFileTypes type)
@@ -56,10 +70,12 @@ public class FileRepository : IFileRepository
                 BucketName = bucket,
                 Key = key,
                 Expires = expiresAt,
-                Protocol = Protocol.HTTP,
+                Protocol = protocolForPublicUrl,
             };
 
-            string url = _s3Client.GetPreSignedURL(request);
+            request.ResponseHeaderOverrides.CacheControl = $"public, max-age={minutes * 60 - 5}";
+
+            string url = _s3Public.GetPreSignedURL(request);
 
             return new PresignedUrl(url, new DateTimeOffset(expiresAt));
         }
@@ -95,7 +111,7 @@ public class FileRepository : IFileRepository
             AutoCloseStream = true
         };
 
-        PutObjectResponse response = await _s3Client.PutObjectAsync(request, cancellationToken);
+        PutObjectResponse response = await _s3Internal.PutObjectAsync(request, cancellationToken);
 
         return metadata;
     }
@@ -120,7 +136,7 @@ public class FileRepository : IFileRepository
             AutoCloseStream = true
         };
 
-        await _s3Client.PutObjectAsync(request, cancellationToken);
+        await _s3Internal.PutObjectAsync(request, cancellationToken);
 
         return key;
     }
@@ -132,6 +148,6 @@ public class FileRepository : IFileRepository
             BucketName = BucketNameForImages,
             Key = key
         };
-        await _s3Client.DeleteObjectAsync(request, cancellationToken);
+        await _s3Internal.DeleteObjectAsync(request, cancellationToken);
     }
 }

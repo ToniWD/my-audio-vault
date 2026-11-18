@@ -113,27 +113,37 @@ public static class DependencyInjection
         services.Configure<S3Settings>(
             configuration.GetSection("AWS"));
 
-        services.AddSingleton<IAmazonS3>(sp =>
+        services.AddKeyedSingleton<IAmazonS3>("Internal", (sp, key) =>
         {
-            var s3Settings = configuration.GetSection("AWS").Get<S3Settings>();
-            if (s3Settings is null) throw new Exception("No aws settings were provided in \"appsettings.json\"");
-
+            var s3Settings = configuration.GetSection("AWS").Get<S3Settings>()
+                ?? throw new Exception("No aws settings were provided in \"appsettings.json\"");
 
             var credentials = new BasicAWSCredentials(s3Settings.AccessKey, s3Settings.SecretKey);
-            var s3Config = new AmazonS3Config
+            return new AmazonS3Client(credentials, new AmazonS3Config
             {
                 ServiceURL = s3Settings.ServiceUrl,
                 ForcePathStyle = s3Settings.ForcePathStyle
-            };
+            });
+        });
 
-            return new AmazonS3Client(credentials, s3Config);
+        services.AddKeyedSingleton<IAmazonS3>("Public", (sp, key) =>
+        {
+            var s3Settings = configuration.GetSection("AWS").Get<S3Settings>()
+                ?? throw new Exception("No aws settings were provided in \"appsettings.json\"");
+
+            var credentials = new BasicAWSCredentials(s3Settings.AccessKey, s3Settings.SecretKey);
+            return new AmazonS3Client(credentials, new AmazonS3Config
+            {
+                ServiceURL = s3Settings.PublicServiceUrl,
+                ForcePathStyle = s3Settings.ForcePathStyle
+            });
         });
     }
 
     public static async Task EnsureS3BucketCreatedAsync(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        var s3Client = scope.ServiceProvider.GetRequiredService<IAmazonS3>();
+        var s3Client = scope.ServiceProvider.GetRequiredKeyedService<IAmazonS3>("Internal");
 
         var loggerFactory = scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
 

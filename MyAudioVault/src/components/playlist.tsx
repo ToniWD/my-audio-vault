@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     },
 
     // ---------------------------------------------------------------- artwork
-    artworkFrame: {
+    artwork: {
         width: 56,
         height: 56,
         borderRadius: 2,

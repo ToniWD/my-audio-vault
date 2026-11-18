@@ -31,6 +31,7 @@ public class AudioPlayerController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("upload")]
     [RequestSizeLimit(20 * 1024 * 1024)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
@@ -101,6 +102,7 @@ public class AudioPlayerController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPut("{songId:guid}/cover-image")]
     [ProducesResponseType(typeof(PresignedUrl), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
